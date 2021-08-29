@@ -1,5 +1,6 @@
 #!/bin/env sh
 
+
 version="3.0.0"
 arch=$(uname -i)
 
@@ -20,6 +21,9 @@ echo "Configuring..."
 echo "Building..."
 make > /dev/null
 cp lib/.libs/libsmb2.so.${version} ../../../lib/libsmb2-${arch}.so.${version}
-echo "Cleaning up..."
-cd ../../
-rm -fr src
+
+if [ "$1" = "clean" ]; then
+	echo "Cleaning up..."
+	cd ../../
+	rm -fr src
+fi
