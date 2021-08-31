@@ -16,7 +16,7 @@ namespace LibSMB2Sharp
 
         public smb2_negotiate_version version;
 
-        public string server; // ptr
+        public string server; // ptr 
         public string share; // ptr
         public string user; // ptr
 
@@ -29,16 +29,7 @@ namespace LibSMB2Sharp
         public byte[] client_challenge;
 
         public smb2_command_cb connect_cb;
-
-        //!
-        //! Potential Issue, read below
-        //!
-        // I don't know what to do with this right now.. based on a search of
-        // the libsmb2 library, it is never once referenced so i have no way to
-        // infer what the data type actually is.. gonna hope that i can just
-        // comment it out and it won't affect the Marshalling from managed 
-        // to unmanaged
-        // void *connect_data; //ptr
+        IntPtr connect_data; // void *connect_data; //ptr
 
         public int credits;
 
@@ -49,8 +40,7 @@ namespace LibSMB2Sharp
         public ulong message_id;
         public ulong session_id;
         
-        [MarshalAs(UnmanagedType.ByValArray)]
-        public byte[] session_key; //ptr
+        public IntPtr session_key; //ptr to byte[]
         public byte session_key_size;
 
         public byte signing_required;
@@ -62,14 +52,18 @@ namespace LibSMB2Sharp
         /*
          * For sending PDUs
          */
-        public smb2_pdu outqueue; // ptr
-        public smb2_pdu waitqueue; // ptr
+        public IntPtr outqueue; // ptr to smb2_pdu
+        public IntPtr waitqueue; // ptr to smb2_pdu
 
+        //% match @ 184 
 
         /*
          * For receiving PDUs
          */
         public smb2_io_vectors _in;
+
+        //% match @ 6352
+
         public smb2_recv_state recv_state;
         
         /* SPL for the (compound) command we are currently reading */
@@ -79,7 +73,6 @@ namespace LibSMB2Sharp
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.SMB2_HEADER_SIZE)]
         public byte[] header;
         
-        //ORIGINAL: struct smb2_header hdr;
         public smb2_header hdr;
         /* Offset into smb2->in where the payload for the current PDU starts */
         public ulong payload_offset;
@@ -87,10 +80,12 @@ namespace LibSMB2Sharp
         /* Pointer to the current PDU that we are receiving the reply for.
          * Only valid once the full smb2 header has been received.
          */
-        public smb2_pdu pdu; // ptr
+        public IntPtr pdu; // ptr to smb2_pdu
 
         /* Server capabilities */
         public char supports_multi_credit;
+
+        //% match @ 6512
 
         public uint max_transact_size;
         public uint max_read_size;
@@ -101,20 +96,18 @@ namespace LibSMB2Sharp
         public byte[] error_string;
 
         /* Open filehandles */
-        public smb2fh fhs; // ptr
+        public IntPtr fhs; // ptr to smb2fh
 
         /* Open dirhandles */
-        //ORIGINAL: struct smb2dir *dirs;
-        public smb2dir dirs; // ptr
+        public IntPtr dirs; // ptr to smb2dir
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct smb2fh 
     {
-        // [MarshalAs(UnmanagedType.)]
-        public IntPtr next; //ptr
+        public IntPtr next; //ptr to smb2fh
         public smb2_command_cb cb;
-        // void *cb_data; // ptr
+        public IntPtr cb_data; // void *cb_data; // ptr
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.SMB2_FD_SIZE)]
         public byte[] file_id; //smb2_file_id
@@ -126,24 +119,22 @@ namespace LibSMB2Sharp
     public struct smb2dir 
     {
         public IntPtr next; // ptr
-        smb2_command_cb cb;
-        // void *cb_data;
+        public smb2_command_cb cb;
+        public IntPtr cb_data; // void *cb_data;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.SMB2_FD_SIZE)]
         public byte[] file_id; //smb2_file_id
 
-        // smb2_dirent_internal entries; // ptr
-        public IntPtr entries; // ptr
+        public IntPtr entries; // ptr to smb2_dirent_internal
         
-        // struct smb2_dirent_internal *current_entry; // ptr
-        public IntPtr current_entry; // ptr
+        public IntPtr current_entry; // struct smb2_dirent_internal *current_entry; // ptr
         int index;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct smb2_dirent_internal 
     {
-        // struct smb2_dirent_internal *next;
-        public IntPtr next; //ptr
+        public IntPtr next; //ptr to smb2_dirent_internal
         public smb2dirent dirent;
     }
 
@@ -183,9 +174,7 @@ namespace LibSMB2Sharp
     [StructLayout(LayoutKind.Sequential)]
     public struct smb2dirent 
     {
-        // const char *name;
-        [MarshalAs(UnmanagedType.ByValArray)]
-        public char[] name; // ptr
+        public string name; // ptr // const char *name;
         public smb2_stat_64 st;
     }
 
@@ -196,7 +185,8 @@ namespace LibSMB2Sharp
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct smb2_sync {
+    public struct smb2_sync 
+    {
         public uint process_id;
         public uint tree_id;
     }
@@ -264,22 +254,20 @@ namespace LibSMB2Sharp
     [StructLayout(LayoutKind.Sequential)]
     public struct smb2_pdu 
     {
-        // struct smb2_pdu *next;
-        public IntPtr next; //ptr
+        public IntPtr next; //ptr // struct smb2_pdu *next;
         public smb2_header header;
 
-        // struct smb2_pdu *next_compound;
-        public IntPtr next_compound; //ptr
+        public IntPtr next_compound; //ptr // struct smb2_pdu *next_compound;
 
         public smb2_command_cb cb;
-        // void *cb_data;
+        public IntPtr cb_data; // void *cb_data;
 
         /* buffer to avoid having to malloc the headers */
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.SMB2_HEADER_SIZE)]
         public byte[] hdr;
 
         /* pointer to the unmarshalled payload in a reply */
-        // void *payload;
+        public IntPtr payload; // void *payload;
 
         /* For sending/receiving
          * out contains at least two vectors:
@@ -310,10 +298,9 @@ namespace LibSMB2Sharp
     [StructLayout(LayoutKind.Sequential)]
     public struct smb2_iovec 
     {
-        [MarshalAs(UnmanagedType.ByValArray)]
-        public char[] buf; // ref
+        public IntPtr buf; // ptr to char[]
         public ulong len;
-        // void (*free)(void *);
+        public IntPtr reserved; // void (*free)(void *);
     }
 
     [StructLayout(LayoutKind.Sequential)]
