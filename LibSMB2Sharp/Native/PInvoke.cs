@@ -741,7 +741,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync fstat()
          */
-        // int smb2_fstat(struct smb2_context *smb2, struct smb2fh *fh, struct smb2_stat_64 *st);
+        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
+        public static extern int smb2_fstat(IntPtr smb2, IntPtr fh, IntPtr st);
 
 
 
@@ -763,7 +764,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync stat()
          */
-        // int smb2_stat(struct smb2_context *smb2, const char *path, struct smb2_stat_64 *st);
+        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
+        public static extern int smb2_stat(IntPtr smb2, string path, IntPtr st);
 
 
 

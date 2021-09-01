@@ -30,46 +30,44 @@ namespace TestCLI
             {
                 Smb2Share share = smb2.OpenShare();
 
-                Console.WriteLine(JsonSerializer.Serialize(share.Entries, new JsonSerializerOptions()
-                {
-                    WriteIndented = true,
-                    IgnoreNullValues = false,
-                    IncludeFields = true
-                }));
-
-                // Smb2FileEntry entry = smb2.OpenFile("/screenrc");
-
-                // using (Smb2DirectoryEntry rootDir = smb2.OpenDirectory("/"))
+                // foreach (var entry in share.Entries)
                 // {
-                //     foreach (var entry in rootDir.GetEntries())
-                //     using (entry)
+                //     string name = entry.Name;
+
+                //     if (entry.Type == Smb2EntryType.Directory)
                 //     {
-                //         string name = entry.Name;
+                //         name += "/";
+                //     }
 
-                //         if (entry.Type == Smb2EntryType.Directory)
+                //     Console.WriteLine("| " + name.PadRight(60) + entry.Size.ToString().PadLeft(14) + entry.ModifyDtm.ToString().PadLeft(30));
+
+                //     Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
+
+                //     if (dirEntry != null)
+                //     {
+                //         foreach (var subentry in dirEntry.Entries)
                 //         {
-                //             name += "/";
-                //         }
+                //             string subname = subentry.Name;
 
-                //         Console.WriteLine("| " + name.PadRight(60) + entry.Size.ToString().PadLeft(14) + entry.ModifyDtm.ToString().PadLeft(30));
+                //             if (subentry.Type == Smb2EntryType.Directory)
+                //                 subname += "/";
 
-                //         Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
-
-                //         if (dirEntry != null)
-                //         {
-                //             foreach (var subentry in dirEntry.GetEntries())
-                //             using(subentry)
-                //             {
-                //                 string subname = subentry.Name;
-
-                //                 if (subentry.Type == Smb2EntryType.Directory)
-                //                     subname += "/";
-
-                //                 Console.WriteLine("|---- " + subname.PadRight(56) + subentry.Size.ToString().PadLeft(14) + subentry.ModifyDtm.ToString().PadLeft(30));
-                //             }
+                //             Console.WriteLine("|---- " + subname.PadRight(56) + subentry.Size.ToString().PadLeft(14) + subentry.ModifyDtm.ToString().PadLeft(30));
                 //         }
                 //     }
                 // }
+
+                share.GetFile("/original_lists/studio_corruptions47.txt");
+
+                // Console.WriteLine(JsonSerializer.Serialize(share.Entries, new JsonSerializerOptions()
+                // {
+                //     WriteIndented = true,
+                //     IgnoreNullValues = false,
+                //     IncludeFields = true
+                // }));
+
+                // Smb2FileEntry entry = smb2.OpenFile("/screenrc");
+
             }
 
 

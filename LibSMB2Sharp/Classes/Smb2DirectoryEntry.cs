@@ -10,6 +10,8 @@ namespace LibSMB2Sharp
 {
     public class Smb2DirectoryEntry : Smb2Entry, IDisposable
     {
+        public IEnumerable<ISmb2Entry> Entries => GetEntries();
+
         private IntPtr _contextPtr = IntPtr.Zero;
         private IntPtr _dirPtr = IntPtr.Zero;
         private Smb2Share _share;
@@ -44,9 +46,30 @@ namespace LibSMB2Sharp
         //     this.RelativePath = path ?? throw new ArgumentNullException(nameof(path));
         // }
 
-        public void Close()
+        private void Open()
+            => Helpers.OpenDir(_contextPtr, ref _dirPtr, this.RelativePath);
+
+        private void Close()
             => Helpers.CloseDir(_contextPtr, ref _dirPtr);
 
+        private IEnumerable<ISmb2Entry> GetEntries(bool ignoreSelfAndParent = true)
+        {
+            Open();
+
+            IntPtr entPtr = IntPtr.Zero;
+
+            while ((entPtr = Methods.smb2_readdir(_contextPtr, _dirPtr)) != IntPtr.Zero)
+            {
+                smb2dirent ent = Marshal.PtrToStructure<smb2dirent>(entPtr);
+
+                if (ignoreSelfAndParent && (ent.name == "." || ent.name == ".."))
+                    continue;
+
+                yield return Helpers.GenerateEntry(_contextPtr, ref ent, _share, this.RelativePath);
+            }
+
+            Close();
+        }
 
         public void Dispose()
             => Close();

@@ -62,10 +62,6 @@ namespace LibSMB2Sharp
             this.SetShare(share);
         }
 
-        // TODO: Add ability to strip leading server info, if present
-        public static string CleanFilePath(string path)
-            => path.Replace('\\', '/').Replace("//", "/");
-
         public Smb2Share OpenShare()
         {
             if (_share != null)

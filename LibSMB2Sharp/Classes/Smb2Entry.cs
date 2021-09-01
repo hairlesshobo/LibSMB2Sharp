@@ -21,9 +21,5 @@ namespace LibSMB2Sharp
         public DateTimeOffset ModifyDtm { get; internal protected set; }
         public Smb2EntryType Type { get; internal protected set; }
 
-        public void Dispose()
-        {
-            // nothing to do here yet
-        }
     }
 }

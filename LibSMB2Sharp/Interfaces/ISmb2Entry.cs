@@ -2,7 +2,7 @@ using System;
 
 namespace LibSMB2Sharp.Interfaces
 {
-    public interface ISmb2Entry : IDisposable
+    public interface ISmb2Entry
     {
         string Name { get; }
         ulong Size { get; }

@@ -27,7 +27,6 @@ namespace LibSMB2Sharp
 
         private IntPtr _contextPtr = IntPtr.Zero;
         private IntPtr _rootDirPtr = IntPtr.Zero;
-        private Smb2DirectoryEntry _rootDir = null;
         private List<Smb2DirectoryEntry> _openDirEntries = new List<Smb2DirectoryEntry>();
         
         internal Smb2Share(IntPtr contextPtr)
@@ -69,11 +68,13 @@ namespace LibSMB2Sharp
         // public Smb2DirectoryEntry GetDirectory(string path)
         //     => new Smb2DirectoryEntry(_contextPtr, path);
 
-        // public Smb2FileEntry GetFile(string filePath)
-        // {
-        //     return new Smb2FileEntry();
-        //     // using (Smb2DirectoryEntry dirEntry = this.OpenDirectory())
-        // }
+        public Smb2FileEntry GetFile(string filePath)
+        {
+            smb2_stat_64? stat = Helpers.Stat(_contextPtr, filePath);
+            
+            return new Smb2FileEntry();
+            // using (Smb2DirectoryEntry dirEntry = this.OpenDirectory())
+        }
 
         public void Dispose()
         {
@@ -105,20 +106,7 @@ namespace LibSMB2Sharp
                 if (ignoreSelfAndParent && (ent.name == "." || ent.name == ".."))
                     continue;
 
-                Smb2Entry newEntry = new Smb2Entry()
-                {
-                    Name = ent.name,
-                    Size = ent.st.smb2_size,
-                    ModifyDtm = DateTimeOffset.FromUnixTimeSeconds((long)ent.st.smb2_mtime),
-                    CreateDtm = DateTimeOffset.FromFileTime((long)ent.st.smb2_ctime),
-                    Type = (Smb2EntryType)ent.st.smb2_type,
-                    RelativePath = Path.Combine("/", ent.name)
-                };
-
-                if (newEntry.Type == Smb2EntryType.Directory)
-                    yield return new Smb2DirectoryEntry(_contextPtr, newEntry, this);
-                else
-                    yield return newEntry;
+                yield return Helpers.GenerateEntry(_contextPtr, ref ent, this);
             }
 
             Close();

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using LibSMB2Sharp.Exceptions;
@@ -25,6 +24,8 @@ namespace LibSMB2Sharp
             {
                 if (path == null)
                     path = String.Empty;
+
+                path = path.TrimStart('/');
                 
                 dirPtr = Methods.smb2_opendir(contextPtr, path);
 
@@ -33,36 +34,52 @@ namespace LibSMB2Sharp
             }
         }
 
-        internal static IEnumerable<ISmb2Entry> GetDirEntries(IntPtr contextPtr, IntPtr dirPtr, Smb2Share share, bool ignoreSelfAndParent = true)
+        internal static ISmb2Entry GenerateEntry(IntPtr contextPtr, ref smb2dirent ent, Smb2Share share, string parentDir = "/")
         {
-            // Open();
-
-            IntPtr entPtr = IntPtr.Zero;
-
-            while ((entPtr = Methods.smb2_readdir(contextPtr, dirPtr)) != IntPtr.Zero)
+            Smb2Entry newEntry = new Smb2Entry()
             {
-                smb2dirent ent = Marshal.PtrToStructure<smb2dirent>(entPtr);
+                Name = ent.name,
+                Size = ent.st.smb2_size,
+                ModifyDtm = DateTimeOffset.FromUnixTimeSeconds((long)ent.st.smb2_mtime),
+                CreateDtm = DateTimeOffset.FromFileTime((long)ent.st.smb2_ctime),
+                Type = (Smb2EntryType)ent.st.smb2_type,
+                RelativePath = Path.Combine(parentDir, ent.name)
+            };
 
-                if (ignoreSelfAndParent && (ent.name == "." || ent.name == ".."))
-                    continue;
+            if (newEntry.Type == Smb2EntryType.Directory)
+                return new Smb2DirectoryEntry(contextPtr, newEntry, share);
+            else
+                return newEntry;
+        }
 
-                Smb2Entry newEntry = new Smb2Entry()
-                {
-                    Name = ent.name,
-                    Size = ent.st.smb2_size,
-                    ModifyDtm = DateTimeOffset.FromUnixTimeSeconds((long)ent.st.smb2_mtime),
-                    CreateDtm = DateTimeOffset.FromFileTime((long)ent.st.smb2_ctime),
-                    Type = (Smb2EntryType)ent.st.smb2_type,
-                    RelativePath = Path.Combine("/", ent.name)
-                };
+        // TODO: Add ability to strip leading server info, if present
+        public static string CleanFilePath(string path)
+            => path.Replace('\\', '/').Replace("//", "/").TrimStart('/');
 
-                if (newEntry.Type == Smb2EntryType.Directory)
-                    yield return new Smb2DirectoryEntry(contextPtr, newEntry, share);
-                else
-                    yield return newEntry;
+
+        internal static smb2_stat_64? Stat(IntPtr contextPtr, string path)
+        {
+            IntPtr ptr = IntPtr.Zero;
+
+            try
+            {
+                ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(smb2_stat_64)));
+
+                int result = Methods.smb2_stat(contextPtr, CleanFilePath(path), ptr);
+
+                if (result == -2)
+                    return null;
+
+                if (ptr == IntPtr.Zero || result < 0)
+                    throw new LibSmb2NativeMethodException(contextPtr);
+
+                return Marshal.PtrToStructure<smb2_stat_64>(ptr);
             }
-
-            // Close();
+            finally
+            {
+                if (ptr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(ptr);
+            }
         }
     }
 }
