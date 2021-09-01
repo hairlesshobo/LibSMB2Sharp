@@ -4,8 +4,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using LibSMB2Sharp;
+using LibSMB2Sharp.Native;
 using LibSMB2Sharp.Exceptions;
+using LibSMB2Sharp;
 
 namespace TestCLI
 {
@@ -25,38 +26,52 @@ namespace TestCLI
                 password = lines[1];
             }
 
-            if (String.IsNullOrWhiteSpace(connString))
-                throw new ArgumentNullException("connString");
-
-            smb2_context smb2 = Methods.smb2_init_context() 
-                ?? throw new LibSMB2SharpException("Failed to init context");
-
-            smb2_url url = Methods.smb2_parse_url(ref smb2, connString)
-                ?? throw new LibSMB2SharpException(ref smb2);
-
-            if (!String.IsNullOrWhiteSpace(url.domain))
-                Methods.smb2_set_domain(ref smb2, url.domain);
-
-            if (!String.IsNullOrWhiteSpace(password))
-                Methods.smb2_set_password(ref smb2, password);
-
-            Methods.smb2_set_security_mode(ref smb2, Const.SMB2_NEGOTIATE_SIGNING_ENABLED);
-
-            if (Methods.smb2_connect_share(ref smb2, url.server, url.share, url.user) < 0)
+            using (Smb2Context smb2 = new Smb2Context(connectionString: connString, password: password))
             {
-                Console.WriteLine("ERROR: " + Methods.smb2_get_error(ref smb2));
-                Environment.Exit(-1);
+                Smb2Share share = smb2.OpenShare();
+
+                Console.WriteLine(JsonSerializer.Serialize(share.Entries, new JsonSerializerOptions()
+                {
+                    WriteIndented = true,
+                    IgnoreNullValues = false,
+                    IncludeFields = true
+                }));
+
+                // Smb2FileEntry entry = smb2.OpenFile("/screenrc");
+
+                // using (Smb2DirectoryEntry rootDir = smb2.OpenDirectory("/"))
+                // {
+                //     foreach (var entry in rootDir.GetEntries())
+                //     using (entry)
+                //     {
+                //         string name = entry.Name;
+
+                //         if (entry.Type == Smb2EntryType.Directory)
+                //         {
+                //             name += "/";
+                //         }
+
+                //         Console.WriteLine("| " + name.PadRight(60) + entry.Size.ToString().PadLeft(14) + entry.ModifyDtm.ToString().PadLeft(30));
+
+                //         Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
+
+                //         if (dirEntry != null)
+                //         {
+                //             foreach (var subentry in dirEntry.GetEntries())
+                //             using(subentry)
+                //             {
+                //                 string subname = subentry.Name;
+
+                //                 if (subentry.Type == Smb2EntryType.Directory)
+                //                     subname += "/";
+
+                //                 Console.WriteLine("|---- " + subname.PadRight(56) + subentry.Size.ToString().PadLeft(14) + subentry.ModifyDtm.ToString().PadLeft(30));
+                //             }
+                //         }
+                //     }
+                // }
             }
 
-            smb2dir dir = Methods.smb2_opendir(ref smb2, url.path)
-                ?? throw new LibSMB2SharpException(ref smb2);
-
-            smb2dirent? ent = null;
-
-            while ((ent = Methods.smb2_readdir(ref smb2, ref dir)) != null)
-            {
-                Console.WriteLine(ent.Value.name);
-            }
 
             // Console.WriteLine(JsonSerializer.Serialize(ent, new JsonSerializerOptions()
             // {

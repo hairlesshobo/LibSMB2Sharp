@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 
-namespace LibSMB2Sharp
+namespace LibSMB2Sharp.Native
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct smb2_context {

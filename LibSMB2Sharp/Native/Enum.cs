@@ -1,6 +1,6 @@
 using System;
 
-namespace LibSMB2Sharp
+namespace LibSMB2Sharp.Native
 {
     public enum smb2_sec 
     {

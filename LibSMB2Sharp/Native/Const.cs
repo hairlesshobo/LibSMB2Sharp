@@ -1,12 +1,10 @@
 using System;
 
-namespace LibSMB2Sharp
+namespace LibSMB2Sharp.Native
 {
     public static class Const
     {
         public const int MAX_ERROR_SIZE = 256;
-
-        // #define PAD_TO_32BIT(len) ((len + 0x03) & 0xfffffffc)
 
         public const int SMB2_SPL_SIZE = 4;
         public const int SMB2_HEADER_SIZE = 64;
@@ -23,5 +21,11 @@ namespace LibSMB2Sharp
          */
         public const UInt16 SMB2_NEGOTIATE_SIGNING_ENABLED = 0x0001;
         public const UInt16 SMB2_NEGOTIATE_SIGNING_REQUIRED = 0x0002;
+
+        /*
+         * File Types
+         */
+        public const UInt32 SMB2_TYPE_FILE = 0x00000000;
+        public const UInt32 SMB2_TYPE_DIRECTORY = 0x00000001;
     }  
 }
