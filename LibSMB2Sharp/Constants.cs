@@ -17,5 +17,11 @@ namespace LibSMB2Sharp
         public const int SMB2_MAX_VECTORS = 256;
 
         public const int SMB2_FD_SIZE = 16;
+
+        /*
+         * SMB2 NEGOTIATE
+         */
+        public const UInt16 SMB2_NEGOTIATE_SIGNING_ENABLED = 0x0001;
+        public const UInt16 SMB2_NEGOTIATE_SIGNING_REQUIRED = 0x0002;
     }  
 }

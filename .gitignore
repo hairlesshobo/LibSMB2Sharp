@@ -451,3 +451,5 @@ $RECYCLE.BIN/
 lib/*.so
 lib/*.so.*
 clib/src/*
+
+dev_connect_string.txt

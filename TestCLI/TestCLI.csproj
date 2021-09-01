@@ -9,4 +9,10 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="./dev_connect_string.txt">
+        <CopyToOutputDirectory>Copy If Newer</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

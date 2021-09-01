@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace LibSMB2Sharp
 {
@@ -93,7 +94,8 @@ namespace LibSMB2Sharp
         public ushort dialect;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.MAX_ERROR_SIZE)]
-        public byte[] error_string;
+        public char[] error_string;
+        // public string error_string;
 
         /* Open filehandles */
         public IntPtr fhs; // ptr to smb2fh
@@ -119,6 +121,8 @@ namespace LibSMB2Sharp
     public struct smb2dir 
     {
         public IntPtr next; // ptr
+    
+        [JsonIgnore]
         public smb2_command_cb cb;
         public IntPtr cb_data; // void *cb_data;
 
@@ -128,7 +132,7 @@ namespace LibSMB2Sharp
         public IntPtr entries; // ptr to smb2_dirent_internal
         
         public IntPtr current_entry; // struct smb2_dirent_internal *current_entry; // ptr
-        int index;
+        public int index;
     }
 
     [StructLayout(LayoutKind.Sequential)]
