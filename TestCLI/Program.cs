@@ -30,7 +30,10 @@ namespace TestCLI
             {
                 Smb2Share share = smb2.OpenShare();
 
-                share.CreateDirectoryTree("/test/another/test/for/steve");
+                // share.CreateDirectoryTree("/test/another/test/for/steve");
+                Smb2DirectoryEntry dirEntry = share.GetDirectory("/test/");
+
+                dirEntry.Remove();
 
 
                 // Smb2FileEntry entry = share.GetFile(".///original_lists//studio_corruptions.txt");

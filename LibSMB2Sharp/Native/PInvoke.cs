@@ -615,7 +615,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync rmdir()
          */
-        // int smb2_rmdir(IntPtr smb2, const char *path);
+        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
+        public static extern int smb2_rmdir(IntPtr smb2, string path);
 
 
 

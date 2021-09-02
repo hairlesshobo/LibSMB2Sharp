@@ -116,6 +116,11 @@ namespace LibSMB2Sharp
 
         public Smb2DirectoryEntry GetDirectory(string path, bool throwOnMissing = true)
         {
+            path = path.Trim();
+
+            if (String.IsNullOrWhiteSpace(path))
+                return this;
+
             Smb2Entry entry = GetEntry(path, throwOnMissing);
 
             if (entry == null)
@@ -148,15 +153,20 @@ namespace LibSMB2Sharp
             if (dirEntN == null)
                 return null;
 
+            smb2dirent dirEnt = dirEntN.Value;
+
             string dirName = Path.GetDirectoryName(path);
 
-            smb2dirent dirEnt = dirEntN.Value;
+            if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
+                dirName = Path.GetDirectoryName(dirName);
 
             return Helpers.GenerateEntry(_contextPtr, ref dirEnt, this, containingDir: dirName);
         }
 
         private smb2dirent? GetDirEnt(string path, bool throwOnMissing = true)
         {
+            path = Helpers.CleanFilePath(path);
+
             smb2_stat_64? stat = Helpers.Stat(_contextPtr, path);
 
             if (stat == null)
@@ -166,6 +176,8 @@ namespace LibSMB2Sharp
                 else
                     return null;
             } 
+
+            path = path.TrimEnd('/');
 
             smb2dirent dirEnt = new smb2dirent()
             {

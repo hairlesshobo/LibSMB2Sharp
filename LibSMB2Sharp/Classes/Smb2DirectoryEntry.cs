@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp.Native;
@@ -8,6 +9,7 @@ namespace LibSMB2Sharp
 {
     public class Smb2DirectoryEntry : Smb2Entry, IDisposable
     {
+        private bool _removed = false;
         private IntPtr _contextPtr = IntPtr.Zero;
         protected IntPtr _dirPtr = IntPtr.Zero;
 
@@ -27,6 +29,9 @@ namespace LibSMB2Sharp
 
         public IEnumerable<Smb2Entry> GetEntries(bool ignoreSelfAndParent = true)
         {
+            if (_removed)
+                throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
+
             Open();
 
             IntPtr entPtr = IntPtr.Zero;
@@ -44,8 +49,31 @@ namespace LibSMB2Sharp
             Close();
         }
 
+        public void Remove()
+        {
+            if (_removed)
+                throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
+
+            // lets protect people from themselves
+            if (this._isRootShare || this.RelativePath == "/" || this.Name == "")
+                throw new LibSmb2OperationNotAllowedException("The root directory of a share cannot be removed");
+
+            if (this.GetEntries().Any())
+                throw new LibSmb2DirectoryNotEmptyException(this.RelativePath);
+
+            int result = Methods.smb2_rmdir(_contextPtr, Helpers.CleanFilePathForNative(this.RelativePath));
+
+            if (result < 0)
+                throw new LibSmb2NativeMethodException(_contextPtr);
+            
+            _removed = true;
+        }
+
         public Smb2DirectoryEntry CreateDirectory(string name)
         {
+            if (_removed)
+                throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
+
             // TODO: impove name sanitization
 
             if (name.IndexOf('/') >= 0 || name.IndexOf('\\') >= 0)
