@@ -20,6 +20,8 @@ namespace LibSMB2Sharp
         public string Share { get; private set; }
         public string Domain { get; private set; }
         public string User { get; private set; }
+        public ulong MaxReadSize { get; private set; }
+        public ulong MaxWriteSize { get; private set; }
 
         private string Password { get; set; }
         public Smb2Context(
@@ -72,6 +74,9 @@ namespace LibSMB2Sharp
                 throw new LibSmb2ConnectionException(_contextPtr);
 
             _share = new Smb2Share(this, _contextPtr);
+
+            this.MaxReadSize = Methods.smb2_get_max_read_size(_contextPtr);
+            this.MaxWriteSize = Methods.smb2_get_max_write_size(_contextPtr);
 
             return _share;
         }
