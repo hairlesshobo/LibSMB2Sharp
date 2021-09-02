@@ -1,5 +1,7 @@
 using System;
-using LibSMB2Sharp.Interfaces;
+using System.Collections.Generic;
+using System.IO;
+using LibSMB2Sharp.Native;
 
 namespace LibSMB2Sharp
 {
@@ -9,17 +11,73 @@ namespace LibSMB2Sharp
         Directory = 1
     }
 
-    public class Smb2Entry : ISmb2Entry
+    public abstract class Smb2Entry
     {
-        public string Name { get; internal protected set; }
-        public string RelativePath { get; internal protected set; }
+        protected Smb2DirectoryEntry _parentDirEntry = null;
+        protected Smb2Share _share = null;
+        protected bool _isRootShare = false;
 
-        public ulong Size { get; internal protected set; }
+        public string Name { get; private protected set; }
+        public string RelativePath {
+            get
+            {
+                if (this._parentDirEntry == null && !String.IsNullOrWhiteSpace(this._containingDir))
+                    return Path.Combine(Helpers.CleanFilePath(this._containingDir), this.Name);
 
-        public DateTimeOffset CreateDtm { get; internal protected  set; }
+                return Path.Combine((this._parentDirEntry == null ? "/" : this._parentDirEntry.RelativePath), this.Name);
+            }
+        }
+        public string Directory => Path.GetDirectoryName(this.RelativePath);
+        public string UncPath => $"{this._share.Context.UncPath}{this.RelativePath}";
 
-        public DateTimeOffset ModifyDtm { get; internal protected set; }
-        public Smb2EntryType Type { get; internal protected set; }
+        public ulong Size { get; private protected set; }
 
+        public DateTimeOffset AcccessDtm { get; private protected  set; }
+        public DateTimeOffset ChangeDtm { get; private protected  set; }
+        public DateTimeOffset CreateDtm { get; private protected  set; }
+        public DateTimeOffset ModifyDtm { get; private protected set; }
+        public Smb2EntryType Type { get; private protected set; }
+        public Smb2Share Share => (_isRootShare ? null : _share);
+        private smb2dirent _dirEnt;
+        private string _containingDir = null;
+
+        protected Smb2Entry()
+        {  }
+
+        protected Smb2Entry(Smb2Share share, ref smb2dirent dirEnt, string containingDir = null, Smb2DirectoryEntry parentDir = null)
+        {
+            _dirEnt = dirEnt;
+            _share = share ?? throw new ArgumentNullException(nameof(share));
+            this._parentDirEntry = parentDir;
+            this._containingDir = containingDir;
+
+            this.SetDetails(ref dirEnt);
+        }
+
+        protected void SetDetails(ref smb2dirent dirEnt)
+        {
+            this.Name = dirEnt.name;
+            this.Size = dirEnt.st.smb2_size;
+            this.AcccessDtm = DateTimeOffset.FromUnixTimeSeconds((long)dirEnt.st.smb2_atime);
+            this.ChangeDtm = DateTimeOffset.FromUnixTimeSeconds((long)dirEnt.st.smb2_ctime);
+            this.CreateDtm = DateTimeOffset.FromUnixTimeSeconds((long)dirEnt.st.smb2_btime);
+            this.ModifyDtm = DateTimeOffset.FromUnixTimeSeconds((long)dirEnt.st.smb2_mtime);
+            this.Type = (Smb2EntryType)dirEnt.st.smb2_type;
+        }
+
+        public Smb2DirectoryEntry GetParentDirectory()
+        {
+            if (this._isRootShare || this.Directory == null)
+                return null;
+
+            if (this._parentDirEntry != null)
+                return this._parentDirEntry;
+
+            Smb2DirectoryEntry parentDirEntry = this._share.GetDirectory(this.Directory);
+
+            this._parentDirEntry = parentDirEntry;
+
+            return this._parentDirEntry;
+        }
     }
 }

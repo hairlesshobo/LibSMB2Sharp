@@ -346,7 +346,7 @@ namespace LibSMB2Sharp.Native
         ///     null if no further files in the directory or
         ///     smb2dirent structure describing the entry
         /// </returns>
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_readdir", SetLastError = true)]
+        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
         public static extern IntPtr smb2_readdir(IntPtr smb2, IntPtr dir);
 
 
@@ -380,6 +380,7 @@ namespace LibSMB2Sharp.Native
 
 
 
+
         /*
          * Async open()
          *
@@ -410,8 +411,10 @@ namespace LibSMB2Sharp.Native
          * Sync open()
          *
          * Returns NULL on failure.
+          returns smb2fh
          */
-        // struct smb2fh *smb2_open(struct smb2_context *smb2, const char *path, int flags);
+        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
+        public static extern IntPtr smb2_open(IntPtr smb2, string path, int flags);
 
 
         /*
@@ -433,7 +436,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync close()
          */
-        // int smb2_close(struct smb2_context *smb2, struct smb2fh *fh);
+        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
+        public static extern int smb2_close(IntPtr smb2, IntPtr fh);
 
 
 
@@ -562,7 +566,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync read()
          */
-        // int smb2_read(struct smb2_context *smb2, struct smb2fh *fh, uint8_t *buf, uint32_t count);
+        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
+        public static extern int smb2_read(IntPtr smb2, IntPtr fh, IntPtr buffer, UInt32 count);
 
 
 

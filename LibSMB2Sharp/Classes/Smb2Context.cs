@@ -14,6 +14,7 @@ namespace LibSMB2Sharp
 
         private Smb2Share _share = null;
 
+        public string UncPath => $"smb://{this.Server}";
         public string ConnectionString { get; private set; }
         public string Server { get; private set; }
         public string Share { get; private set; }
@@ -70,7 +71,7 @@ namespace LibSMB2Sharp
             if (Methods.smb2_connect_share(_contextPtr, this.Server, this.Share, this.User) < 0)
                 throw new LibSmb2ConnectionException(_contextPtr);
 
-            _share = new Smb2Share(_contextPtr);
+            _share = new Smb2Share(this, _contextPtr);
 
             return _share;
         }

@@ -30,36 +30,20 @@ namespace TestCLI
             {
                 Smb2Share share = smb2.OpenShare();
 
-                // foreach (var entry in share.Entries)
-                // {
-                //     string name = entry.Name;
+                Smb2FileEntry entry = share.GetFile(".///original_lists//studio_corruptions.txt");
+                
+                using (Smb2FileReader reader = entry.OpenReader())
+                {
+                    byte[] buff = new byte[2048];
 
-                //     if (entry.Type == Smb2EntryType.Directory)
-                //     {
-                //         name += "/";
-                //     }
+                    int bytesRead = reader.Read(buff, 0, buff.Length);
 
-                //     Console.WriteLine("| " + name.PadRight(60) + entry.Size.ToString().PadLeft(14) + entry.ModifyDtm.ToString().PadLeft(30));
+                    string str = System.Text.Encoding.UTF8.GetString(buff, 0, bytesRead);
 
-                //     Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
+                    Console.WriteLine(str);
+                }
 
-                //     if (dirEntry != null)
-                //     {
-                //         foreach (var subentry in dirEntry.Entries)
-                //         {
-                //             string subname = subentry.Name;
-
-                //             if (subentry.Type == Smb2EntryType.Directory)
-                //                 subname += "/";
-
-                //             Console.WriteLine("|---- " + subname.PadRight(56) + subentry.Size.ToString().PadLeft(14) + subentry.ModifyDtm.ToString().PadLeft(30));
-                //         }
-                //     }
-                // }
-
-                share.GetFile("/original_lists/studio_corruptions47.txt");
-
-                // Console.WriteLine(JsonSerializer.Serialize(share.Entries, new JsonSerializerOptions()
+                // Console.WriteLine(JsonSerializer.Serialize(entry, new JsonSerializerOptions()
                 // {
                 //     WriteIndented = true,
                 //     IgnoreNullValues = false,

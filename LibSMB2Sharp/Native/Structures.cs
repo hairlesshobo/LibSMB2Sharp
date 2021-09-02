@@ -145,17 +145,17 @@ namespace LibSMB2Sharp.Native
     [StructLayout(LayoutKind.Sequential)]
     public struct smb2_stat_64 
     {
-        public uint smb2_type;
-        public uint smb2_nlink;
-        public ulong smb2_ino;
-        public ulong smb2_size;
-        public ulong smb2_atime;
+        public uint smb2_type; // file or directory?
+        public uint smb2_nlink; // number of hard links
+        public ulong smb2_ino; // inode
+        public ulong smb2_size; // sizes of file
+        public ulong smb2_atime; // last access time
         public ulong smb2_atime_nsec;
-        public ulong smb2_mtime;
+        public ulong smb2_mtime; // last modify time
         public ulong smb2_mtime_nsec;
-        public ulong smb2_ctime;
+        public ulong smb2_ctime; // change time
         public ulong smb2_ctime_nsec;
-        public ulong smb2_btime;
+        public ulong smb2_btime; // creation time
         public ulong smb2_btime_nsec;
     }
 

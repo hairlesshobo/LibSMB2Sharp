@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using LibSMB2Sharp.Exceptions;
-using LibSMB2Sharp.Interfaces;
 using LibSMB2Sharp.Native;
 
 namespace LibSMB2Sharp
@@ -34,27 +33,20 @@ namespace LibSMB2Sharp
             }
         }
 
-        internal static ISmb2Entry GenerateEntry(IntPtr contextPtr, ref smb2dirent ent, Smb2Share share, string parentDir = "/")
+        internal static Smb2Entry GenerateEntry(IntPtr contextPtr, ref smb2dirent dirEnt, Smb2Share share, string containingDir = null, Smb2DirectoryEntry parent = null)
         {
-            Smb2Entry newEntry = new Smb2Entry()
-            {
-                Name = ent.name,
-                Size = ent.st.smb2_size,
-                ModifyDtm = DateTimeOffset.FromUnixTimeSeconds((long)ent.st.smb2_mtime),
-                CreateDtm = DateTimeOffset.FromFileTime((long)ent.st.smb2_ctime),
-                Type = (Smb2EntryType)ent.st.smb2_type,
-                RelativePath = Path.Combine(parentDir, ent.name)
-            };
-
-            if (newEntry.Type == Smb2EntryType.Directory)
-                return new Smb2DirectoryEntry(contextPtr, newEntry, share);
+            if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
+                return new Smb2DirectoryEntry(contextPtr, share, ref dirEnt, containingDir, parent);
             else
-                return newEntry;
+                return new Smb2FileEntry(contextPtr, share, ref dirEnt, containingDir, parent);
         }
 
         // TODO: Add ability to strip leading server info, if present
+        public static string CleanFilePathForNative(string path)
+            => CleanFilePath(path).TrimStart('/');
+
         public static string CleanFilePath(string path)
-            => path.Replace('\\', '/').Replace("//", "/").TrimStart('/');
+            => path.Replace('\\', '/').Replace("//", "/").TrimStart('.');
 
 
         internal static smb2_stat_64? Stat(IntPtr contextPtr, string path)
@@ -65,7 +57,7 @@ namespace LibSMB2Sharp
             {
                 ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(smb2_stat_64)));
 
-                int result = Methods.smb2_stat(contextPtr, CleanFilePath(path), ptr);
+                int result = Methods.smb2_stat(contextPtr, CleanFilePathForNative(path), ptr);
 
                 if (result == -2)
                     return null;

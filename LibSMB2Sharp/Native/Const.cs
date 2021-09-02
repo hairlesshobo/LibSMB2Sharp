@@ -27,5 +27,15 @@ namespace LibSMB2Sharp.Native
          */
         public const UInt32 SMB2_TYPE_FILE = 0x00000000;
         public const UInt32 SMB2_TYPE_DIRECTORY = 0x00000001;
+
+        /*
+         * File open flags
+         */
+        public const int O_RDONLY = 00;
+        public const int O_WRONLY = 01;
+        public const int O_RDWR = 02;
+        public const int O_CREAT = 0100;
+        public const int O_EXCL = 0200;
+        public const int O_SYNC = 04010000;
     }  
 }
