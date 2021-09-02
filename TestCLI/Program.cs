@@ -30,18 +30,12 @@ namespace TestCLI
             {
                 Smb2Share share = smb2.OpenShare();
 
-                Smb2FileEntry entry = share.GetFile(".///original_lists//studio_corruptions.txt");
+                share.CreateDirectoryTree("/test/another/test/for/steve");
+
+
+                // Smb2FileEntry entry = share.GetFile(".///original_lists//studio_corruptions.txt");
                 
-                using (Smb2FileReader reader = entry.OpenReader())
-                {
-                    byte[] buff = new byte[2048];
-
-                    int bytesRead = reader.Read(buff, 0, buff.Length);
-
-                    string str = System.Text.Encoding.UTF8.GetString(buff, 0, bytesRead);
-
-                    Console.WriteLine(str);
-                }
+                
 
                 // Console.WriteLine(JsonSerializer.Serialize(entry, new JsonSerializerOptions()
                 // {

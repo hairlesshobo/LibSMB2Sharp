@@ -35,7 +35,8 @@ namespace LibSMB2Sharp
             this.Context = context ?? throw new ArgumentNullException(nameof(context));
             _contextPtr = contextPtr;
 
-            smb2dirent dirEnt = this.GetDirEnt("/");
+            smb2dirent? dirEntN = this.GetDirEnt("/");
+            smb2dirent dirEnt = dirEntN.Value;
 
             this.SetDetails(ref dirEnt);
 
@@ -71,9 +72,54 @@ namespace LibSMB2Sharp
             }
         }
 
-        public Smb2DirectoryEntry GetDirectory(string path)
+        public Smb2DirectoryEntry CreateDirectoryTree(string path)
+        {                
+            string rawPath = Helpers.CleanFilePathForNative(path);
+
+            string testPath = rawPath.TrimEnd('/') + "/";
+
+            // lets find the highest level dir that actually exists
+
+            Smb2DirectoryEntry dirEntry = null;
+
+            do
+            {
+                int index = testPath.LastIndexOf('/');
+                
+                if (index < 0)
+                    index = 0;
+
+                testPath = testPath.Substring(0, index);
+
+                dirEntry = this.GetDirectory(testPath, false);
+
+                if (dirEntry != null)
+                    break;
+
+            } while (testPath.Length > 0);
+
+            if (dirEntry == null)
+                throw new LibSmb2FileNotFoundException("");
+
+            string remainingPath = rawPath.Substring(testPath.Length);
+            
+            string[] remainingParts = rawPath.Split('/');
+
+            foreach (string part in remainingParts)
+            {
+                Smb2DirectoryEntry newDirEntry = dirEntry.CreateDirectory(part);
+                dirEntry = newDirEntry;
+            }
+
+            return dirEntry;
+        }
+
+        public Smb2DirectoryEntry GetDirectory(string path, bool throwOnMissing = true)
         {
-            Smb2Entry entry = GetEntry(path);
+            Smb2Entry entry = GetEntry(path, throwOnMissing);
+
+            if (entry == null)
+                return null;
 
             Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
 
@@ -95,21 +141,31 @@ namespace LibSMB2Sharp
             return fileEntry;
         }
         
-        public Smb2Entry GetEntry(string path)
+        public Smb2Entry GetEntry(string path, bool throwOnMissing = true)
         {
-            smb2dirent dirEnt = this.GetDirEnt(path);
+            smb2dirent? dirEntN = this.GetDirEnt(path, throwOnMissing);
+
+            if (dirEntN == null)
+                return null;
 
             string dirName = Path.GetDirectoryName(path);
+
+            smb2dirent dirEnt = dirEntN.Value;
 
             return Helpers.GenerateEntry(_contextPtr, ref dirEnt, this, containingDir: dirName);
         }
 
-        private smb2dirent GetDirEnt(string path)
+        private smb2dirent? GetDirEnt(string path, bool throwOnMissing = true)
         {
             smb2_stat_64? stat = Helpers.Stat(_contextPtr, path);
 
             if (stat == null)
-                throw new LibSmb2FileNotFoundException(path);
+            {
+                if (throwOnMissing)
+                    throw new LibSmb2FileNotFoundException(path);
+                else
+                    return null;
+            } 
 
             smb2dirent dirEnt = new smb2dirent()
             {
