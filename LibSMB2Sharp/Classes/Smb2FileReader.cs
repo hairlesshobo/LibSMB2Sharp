@@ -8,7 +8,6 @@ namespace LibSMB2Sharp
 {
     public class Smb2FileReader : Stream
     {
-        private long _length = -1;
         private long _position = 0;
         private IntPtr _contextPtr = IntPtr.Zero;
         private IntPtr _fhPtr = IntPtr.Zero;
@@ -17,17 +16,17 @@ namespace LibSMB2Sharp
 
         public override bool CanRead => true;
 
-        public override bool CanSeek => throw new NotImplementedException();
+        public override bool CanSeek => false;
 
         public override bool CanWrite => false;
 
-        public override long Length => _length;
+        public override long Length => (long)this.FileEntry.Size;
         public Smb2FileEntry FileEntry { get; private set; }
 
-        public override long Position
+        public override long Position 
         {
             get => _position;
-            set => throw new NotImplementedException();
+            set => throw new NotSupportedException();
         }
 
         public Smb2FileReader(IntPtr contextPtr, Smb2FileEntry entry)
@@ -58,10 +57,15 @@ namespace LibSMB2Sharp
 
                 // allocate the buffer
                 _bufferPtr = Marshal.AllocHGlobal(count);
+
+                this._bufferSize = count;
             }
 
-            if ((this.Length - this.Position) > count)
+            if ((this.Length - this.Position) < count)
                 count = (int)(this.Length - this.Position);
+
+            if (count == 0)
+                return 0;
             
             int bytesRead = Methods.smb2_read(_contextPtr, _fhPtr, _bufferPtr, (uint)count);
 
