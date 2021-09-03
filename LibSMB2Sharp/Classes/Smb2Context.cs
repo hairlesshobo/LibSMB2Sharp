@@ -1,5 +1,7 @@
 using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp.Native;
 
@@ -13,6 +15,7 @@ namespace LibSMB2Sharp
         private IntPtr _urlPtr = IntPtr.Zero;
 
         private Smb2Share _share = null;
+        private Task _asyncRunnerTask = Task.CompletedTask;
 
         public string UncPath => $"smb://{this.Server}";
         public string ConnectionString { get; private set; }
@@ -79,6 +82,63 @@ namespace LibSMB2Sharp
             this.MaxWriteSize = Methods.smb2_get_max_write_size(_contextPtr);
 
             return _share;
+        }
+
+
+        /// <summary>
+        /// !!! DO NOT USE !!!
+        /// !!! DOES NOT WORK YET !!!
+        /// Start the async polling on the libsmb2 side
+        /// </summary>
+        private void StartAsync()
+        {
+            _asyncRunnerTask = Task.Run(() => 
+            {
+                pollfd pfd = new pollfd();
+                IntPtr pfdPtr = IntPtr.Zero;
+                bool is_finished = false;
+
+                try
+                {
+                    pfdPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(pollfd)));
+
+                    while (!is_finished) {
+                        pfd.fd = Methods.smb2_get_fd(_contextPtr);
+                        pfd.events = (short)Methods.smb2_which_events(_contextPtr);
+
+                        Marshal.StructureToPtr(pfd, pfdPtr, false);
+
+                        int result = Methods.poll(pfdPtr, 1, 1000);
+
+                        pfd = Marshal.PtrToStructure<pollfd>(pfdPtr);
+
+                        if (result < 0)
+                            throw new Win32Exception(Marshal.GetLastWin32Error());
+                            // throw new Exception($"Poll failed : error code {result}");
+
+                        // Console.WriteLine($"   Poll Result: {result}");
+
+                        if (pfd.revents == 0)
+                                continue;
+
+                        result = Methods.smb2_service(_contextPtr, pfd.revents);
+
+                        // Console.WriteLine($"Service Result: {result}");
+                        
+                        if (result < 0)
+                            throw new Exception(Methods.smb2_get_error(_contextPtr));
+                            // throw new LibSmb2NativeMethodException(_contextPtr);
+                            // Console.WriteLine("smb2_service failed with : %s\n",
+                                            // Methods.smb2_get_error(_contextPtr));
+                            // break;
+                    }
+                }
+                finally
+                {
+                    if (pfdPtr != IntPtr.Zero)
+                        Marshal.FreeHGlobal(pfdPtr);
+                }
+            });
         }
 
 

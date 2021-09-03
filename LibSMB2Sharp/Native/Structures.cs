@@ -316,4 +316,12 @@ namespace LibSMB2Sharp.Native
         public string share; // ptr
         public string path; // ptr
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct pollfd
+    {
+        public int fd;			/* File descriptor to poll.  */
+        public short events;		/* Types of events poller cares about.  */
+        public short revents;		/* Types of events that actually occurred.  */
+    };
 }

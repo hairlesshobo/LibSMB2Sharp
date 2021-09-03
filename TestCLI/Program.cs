@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using LibSMB2Sharp.Native;
 using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp;
+using System.Threading.Tasks;
 
 namespace TestCLI
 {
@@ -31,9 +32,9 @@ namespace TestCLI
                 Smb2Share share = smb2.OpenShare();
 
                 // share.CreateDirectoryTree("/test/another/test/for/steve");
-                Smb2DirectoryEntry dirEntry = share.GetDirectory("/test/");
+                // Smb2DirectoryEntry dirEntry = share.GetDirectory("/test/");
 
-                dirEntry.Remove();
+                // dirEntry.Remove();
 
 
                 // Smb2FileEntry entry = share.GetFile(".///original_lists//studio_corruptions.txt");

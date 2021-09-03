@@ -254,6 +254,8 @@ namespace LibSMB2Sharp.Native
 
             string error = Marshal.PtrToStringAuto(ptr);
 
+            // Console.WriteLine(error);
+
             return error;
         }
 
@@ -835,5 +837,14 @@ namespace LibSMB2Sharp.Native
          */
         [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
         public static extern int smb2_ftruncate(IntPtr smb2, IntPtr fh, ulong length);
+
+
+        // public static extern int poll(pollfd fds, ulong nfds, int timeout);
+
+
+        [DllImport("libsmb2.so.3.0.0", EntryPoint = "poll", SetLastError = true)]
+        // static inline int poll(struct pollfd pfd[], uint32_t size, int nvecs)
+        // public static extern int poll(struct pollfd pfd[], uint32_t size, int nvecs)
+        public static extern int poll(IntPtr fds, ulong nfds, int timeout);
     }
 }

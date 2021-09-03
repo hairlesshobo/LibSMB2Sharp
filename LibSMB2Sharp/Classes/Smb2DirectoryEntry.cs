@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp.Native;
 
@@ -87,6 +88,36 @@ namespace LibSMB2Sharp
                 throw new LibSmb2NativeMethodException(_contextPtr);
             
             return _share.GetDirectory(dirNameRelative);
+        }
+
+        private Task<Smb2DirectoryEntry> CreateDirectoryAsync(string name)
+        {
+            if (_removed)
+                throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
+
+            // TODO: impove name sanitization
+
+            if (name.IndexOf('/') >= 0 || name.IndexOf('\\') >= 0)
+                throw new LibSmb2InvalidDirectoryNameException(name);
+
+            string dirNameRelative = $"{this.RelativePath}/{name}";
+
+            var t = new TaskCompletionSource<Smb2DirectoryEntry>();
+
+            smb2_command_cb callback = (smb2, status, command_data, cb_data) =>
+            {
+                Console.WriteLine("MEOW!");
+                t.TrySetResult(null);
+            };
+
+            IntPtr cbPtr = IntPtr.Zero;
+
+            if (Methods.smb2_mkdir_async(_contextPtr, Helpers.CleanFilePath(dirNameRelative), callback, cbPtr) < 0)
+                throw new LibSmb2NativeMethodException(_contextPtr);
+
+                
+            return t.Task;
+            // return _share.GetDirectory(dirNameRelative);
         }
 
         public virtual void Dispose()
