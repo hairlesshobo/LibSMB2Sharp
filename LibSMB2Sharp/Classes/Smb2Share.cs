@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp.Native;
 
@@ -134,6 +135,26 @@ namespace LibSMB2Sharp
             return dirEntry;
         }
 
+        public async Task<Smb2DirectoryEntry> GetDirectoryAsync(string path, bool throwOnMissing = true)
+        {
+            path = path.Trim();
+
+            if (String.IsNullOrWhiteSpace(path))
+                return this;
+
+            Smb2Entry entry = await GetEntryAsync(path, throwOnMissing);
+
+            if (entry == null)
+                return null;
+
+            Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
+
+            if (dirEntry == null)
+                throw new LibSmb2NotADirectoryException(path);
+
+            return dirEntry;
+        }
+
         public Smb2FileEntry GetFile(string path)
         {
             Smb2Entry entry = GetEntry(path);
@@ -149,6 +170,23 @@ namespace LibSMB2Sharp
         public Smb2Entry GetEntry(string path, bool throwOnMissing = true)
         {
             smb2dirent? dirEntN = this.GetDirEnt(path, throwOnMissing);
+
+            if (dirEntN == null)
+                return null;
+
+            smb2dirent dirEnt = dirEntN.Value;
+
+            string dirName = Path.GetDirectoryName(path);
+
+            if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
+                dirName = Path.GetDirectoryName(dirName);
+
+            return Helpers.GenerateEntry(_contextPtr, ref dirEnt, this, containingDir: dirName);
+        }
+
+        public async Task<Smb2Entry> GetEntryAsync(string path, bool throwOnMissing = true)
+        {
+            smb2dirent? dirEntN = await this.GetDirEntAsync(path, throwOnMissing);
 
             if (dirEntN == null)
                 return null;
@@ -187,6 +225,32 @@ namespace LibSMB2Sharp
 
             return dirEnt;
         }
+
+        private async Task<Nullable<smb2dirent>> GetDirEntAsync(string path, bool throwOnMissing = true)
+        {
+            path = Helpers.CleanFilePath(path);
+
+            smb2_stat_64? stat = await Helpers.StatAsync(_contextPtr, path);
+
+            if (stat == null)
+            {
+                if (throwOnMissing)
+                    throw new LibSmb2FileNotFoundException(path);
+                else
+                    return null;
+            } 
+
+            path = path.TrimEnd('/');
+
+            smb2dirent dirEnt = new smb2dirent()
+            {
+                name = Path.GetFileName(path),
+                st = stat.Value
+            };
+
+            return dirEnt;
+        }
+
 
         public override void Dispose()
         {

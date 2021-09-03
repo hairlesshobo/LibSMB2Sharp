@@ -104,25 +104,19 @@ namespace LibSMB2Sharp
 
             TaskCompletionSource<Smb2DirectoryEntry> tcs = new TaskCompletionSource<Smb2DirectoryEntry>();
 
-            IntPtr cbPtr = IntPtr.Zero;
-
             int result = Methods.smb2_mkdir_async(
                 _contextPtr, 
                 Helpers.CleanFilePathForNative(dirNameRelative), 
-                Helpers.AsyncCallback(() => {
-                    Console.WriteLine($"MEOW!");
-                    tcs.TrySetResult(null);
-                }),
-                // callback, 
-                cbPtr
+                Helpers.AsyncCallback(async (_) => tcs.TrySetResult(await _share.GetDirectoryAsync(dirNameRelative))),
+                // Helpers.AsyncCallback(() => tcs.TrySetResult(_share.GetDirectory(dirNameRelative))),
+                // Helpers.AsyncCallback((_) => tcs.TrySetResult(null)),
+                IntPtr.Zero
             );
 
             if (result < Const.EOK)
                 throw new LibSmb2NativeMethodException(_contextPtr, result);
-
                 
             return tcs.Task;
-            // return _share.GetDirectory(dirNameRelative);
         }
 
         public virtual void Dispose()

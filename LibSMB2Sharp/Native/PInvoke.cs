@@ -751,7 +751,8 @@ namespace LibSMB2Sharp.Native
          *      0 : Success. Command_data is struct smb2_stat_64
          * -errno : An error occured.
          */
-        // int smb2_stat_async(IntPtr smb2, const char *path, struct smb2_stat_64 *st, smb2_command_cb cb, void *cb_data);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_stat_async(IntPtr smb2, string path, IntPtr st, smb2_command_cb cb, IntPtr cb_data);
 
 
         /*

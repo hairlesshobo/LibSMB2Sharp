@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp.Native;
 
@@ -8,16 +9,16 @@ namespace LibSMB2Sharp
 {
     internal class Helpers
     {
-        internal delegate void ActionRef<T>(ref T item) where T : struct;
+        internal delegate void ActionRef<T>(int result, ref T item) where T : struct;
 
-        internal static smb2_command_cb AsyncCallback(Action callback)
+        internal static smb2_command_cb AsyncCallback(Action<int> callback)
         {
             smb2_command_cb asyncCallback = (smb2, result, command_data, cb_data) =>
             {
                 if (result < Const.EOK)
                     throw new LibSmb2NativeMethodException(smb2, result);
 
-                callback();
+                callback(result);
             };
 
             return asyncCallback;
@@ -33,8 +34,15 @@ namespace LibSMB2Sharp
 
                 TResult resultStruct = Marshal.PtrToStructure<TResult>(command_data);
 
-                callback(ref resultStruct);
+                callback(result, ref resultStruct);
             };
+
+            return asyncCallback;
+        }
+
+        internal static smb2_command_cb AsyncCallbackRaw(Action<int, IntPtr> callback)
+        {
+            smb2_command_cb asyncCallback = (smb2, result, command_data, cb_data) => callback(result, command_data);
 
             return asyncCallback;
         }
@@ -104,6 +112,39 @@ namespace LibSMB2Sharp
                 if (ptr != IntPtr.Zero)
                     Marshal.FreeHGlobal(ptr);
             }
+        }
+
+        internal static Task<Nullable<smb2_stat_64>> StatAsync(IntPtr contextPtr, string path)
+        {
+            TaskCompletionSource<Nullable<smb2_stat_64>> tcs = new TaskCompletionSource<smb2_stat_64?>();
+
+            IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(smb2_stat_64)));
+
+            int result = Methods.smb2_stat_async(
+                contextPtr, 
+                Helpers.CleanFilePathForNative(path), 
+                ptr, 
+                Helpers.AsyncCallbackRaw((cbResult, dataPtr) => {
+                    if (cbResult == -Const.ENOENT)
+                        tcs.TrySetResult(null);
+
+                    if (dataPtr == IntPtr.Zero || cbResult < Const.EOK)
+                        throw new LibSmb2NativeMethodException(contextPtr, cbResult);
+
+                    smb2_stat_64 statResult = Marshal.PtrToStructure<smb2_stat_64>(dataPtr);
+
+                    // if (ptr != IntPtr.Zero)
+                    //     Marshal.FreeHGlobal(ptr);
+
+                    tcs.TrySetResult(statResult);
+                }),
+                IntPtr.Zero
+            );
+
+            if (result < Const.EOK)
+                throw new LibSmb2NativeMethodException(contextPtr, result);
+
+            return tcs.Task;
         }
 
         internal static string GetSmb2ErrorMessage(int errno)

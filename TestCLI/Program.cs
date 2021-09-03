@@ -34,6 +34,8 @@ namespace TestCLI
 
                 Console.WriteLine("before");
                 await share.CreateDirectoryAsync("meow");
+                // await Task.Delay(4000);
+                // Smb2DirectoryEntry entry = share.GetDirectory("/meow");
                 Console.WriteLine("after");
 
                 // foreach (Smb2Entry entry in share.GetEntries())
