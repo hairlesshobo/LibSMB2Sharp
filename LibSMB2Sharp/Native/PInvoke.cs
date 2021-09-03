@@ -28,6 +28,35 @@ namespace LibSMB2Sharp.Native
 
 
 
+        /*
+         * The following three functions are used to integrate libsmb2 in an event
+         * system.
+         */
+        /*
+         * Returns the file descriptor that libsmb2 uses.
+         */
+        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_init_context", SetLastError = true)]
+        public static extern int smb2_get_fd(IntPtr smb2);
+
+        /*
+         * Returns which events that we need to poll for for the smb2 file descriptor.
+         */
+        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_init_context", SetLastError = true)]
+        public static extern int smb2_which_events(IntPtr smb2);
+        /*
+         * Called to process the events when events become available for the smb2
+         * file descriptor.
+         *
+         * Returns:
+         *  0 : Success
+         * <0 : Unrecoverable failure. At this point the context can no longer be
+         *      used and must be freed by calling smb2_destroy_context().
+         *
+         */
+        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_init_context", SetLastError = true)]
+        public static extern int smb2_service(IntPtr smb2, int revents);
+
+
         /// <summary>
         /// Set the security mode for the connection.
         /// 
@@ -637,8 +666,8 @@ namespace LibSMB2Sharp.Native
          *
          * Command_data is always NULL.
          */
-        // [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        // public static extern int smb2_mkdir_async(IntPtr smb2, string path, smb2_command_cb cb, void *cb_data);
+        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
+        public static extern int smb2_mkdir_async(IntPtr smb2, string path, smb2_command_cb cb, IntPtr cb_data);
 
 
 
