@@ -450,6 +450,7 @@ $RECYCLE.BIN/
 
 lib/*.so
 lib/*.so.*
-clib/src/*
+clib/bin*/*
+clib/src*/*
 
 dev_connect_string.txt

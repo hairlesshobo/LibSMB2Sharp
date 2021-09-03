@@ -1,29 +1,28 @@
-#!/bin/env sh
+#!/bin/sh
 
+# arch=$(uname -i)
+arch=x64
 
-version="3.0.0"
-arch=$(uname -i)
+mkdir -p bin
 
 rm -fr src
 mkdir -p src
 cd src
-echo "Downloading source..."
-wget https://github.com/sahlberg/libsmb2/archive/refs/tags/v${version}.tar.gz > /dev/null 2>&1
-echo "Extracting..."
-tar zxf v${version}.tar.gz
-cd libsmb2-${version}
-echo "Generating Makefile..."
-automake > /dev/null 2>&1
-echo "Generating configure file..."
-autoreconf -i > /dev/null 2>&1
-echo "Configuring..."
-./configure --without-libkrb5 > /dev/null 2>&1
-echo "Building..."
-make > /dev/null
-cp lib/.libs/libsmb2.so.${version} ../../../lib/libsmb2-${arch}.so.${version}
 
-if [ "$1" = "clean" ]; then
-	echo "Cleaning up..."
-	cd ../../
-	rm -fr src
-fi
+echo "Cloning repo..."
+git clone https://github.com/sahlberg/libsmb2.git > /dev/null 2>&1
+
+cd ../../
+
+echo "Starting to build libsmb2-linux-${arch}.so in docker..."
+docker rm build-libsmb2-linux-${arch} > /dev/null 2>&1
+docker run --name build-libsmb2-linux-${arch} -v $(pwd):/build -it debian:stretch /build/build-docker-linux-x64.sh 
+
+cp lib/.libs/libsmb2.so  ./bin/libsmb2-linux-${arch}.so
+
+
+
+# if [ "$1" = "clean" ]; then
+# 	echo "Cleaning up..."
+# 	rm -fr src
+# fi
