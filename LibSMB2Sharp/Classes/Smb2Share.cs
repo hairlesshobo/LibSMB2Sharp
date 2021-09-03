@@ -48,8 +48,8 @@ namespace LibSMB2Sharp
 
                 int result = Methods.smb2_statvfs(_contextPtr, "", ptr);
 
-                if (result < 0)
-                    throw new LibSmb2NativeMethodException(_contextPtr);
+                if (result < Const.EOK)
+                    throw new LibSmb2NativeMethodException(_contextPtr, result);
 
                 smb2_statvfs statvfs = Marshal.PtrToStructure<smb2_statvfs>(ptr);
 

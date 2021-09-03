@@ -13,7 +13,7 @@ namespace TestCLI
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             string connString = String.Empty;
             string password = String.Empty;
@@ -30,6 +30,16 @@ namespace TestCLI
             using (Smb2Context smb2 = new Smb2Context(connectionString: connString, password: password))
             {
                 Smb2Share share = smb2.OpenShare();
+                smb2.StartAsync();
+
+                Console.WriteLine("before");
+                await share.CreateDirectoryAsync("meow");
+                Console.WriteLine("after");
+
+                // foreach (Smb2Entry entry in share.GetEntries())
+                // {
+                //     Console.WriteLine(entry.RelativePath);
+                // }
 
                 // share.CreateDirectoryTree("/test/another/test/for/steve");
                 // Smb2DirectoryEntry dirEntry = share.GetDirectory("/test/");

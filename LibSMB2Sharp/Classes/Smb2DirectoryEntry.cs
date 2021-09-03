@@ -64,8 +64,8 @@ namespace LibSMB2Sharp
 
             int result = Methods.smb2_rmdir(_contextPtr, Helpers.CleanFilePathForNative(this.RelativePath));
 
-            if (result < 0)
-                throw new LibSmb2NativeMethodException(_contextPtr);
+            if (result < Const.EOK)
+                throw new LibSmb2NativeMethodException(_contextPtr, result);
             
             _removed = true;
         }
@@ -84,13 +84,13 @@ namespace LibSMB2Sharp
                 
             int result = Methods.smb2_mkdir(_contextPtr, Helpers.CleanFilePathForNative(dirNameRelative));
 
-            if (result < 0)
-                throw new LibSmb2NativeMethodException(_contextPtr);
+            if (result < Const.EOK)
+                throw new LibSmb2NativeMethodException(_contextPtr, result);
             
             return _share.GetDirectory(dirNameRelative);
         }
 
-        private Task<Smb2DirectoryEntry> CreateDirectoryAsync(string name)
+        public Task<Smb2DirectoryEntry> CreateDirectoryAsync(string name)
         {
             if (_removed)
                 throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
@@ -102,21 +102,26 @@ namespace LibSMB2Sharp
 
             string dirNameRelative = $"{this.RelativePath}/{name}";
 
-            var t = new TaskCompletionSource<Smb2DirectoryEntry>();
-
-            smb2_command_cb callback = (smb2, status, command_data, cb_data) =>
-            {
-                Console.WriteLine("MEOW!");
-                t.TrySetResult(null);
-            };
+            TaskCompletionSource<Smb2DirectoryEntry> tcs = new TaskCompletionSource<Smb2DirectoryEntry>();
 
             IntPtr cbPtr = IntPtr.Zero;
 
-            if (Methods.smb2_mkdir_async(_contextPtr, Helpers.CleanFilePath(dirNameRelative), callback, cbPtr) < 0)
-                throw new LibSmb2NativeMethodException(_contextPtr);
+            int result = Methods.smb2_mkdir_async(
+                _contextPtr, 
+                Helpers.CleanFilePathForNative(dirNameRelative), 
+                Helpers.AsyncCallback(() => {
+                    Console.WriteLine($"MEOW!");
+                    tcs.TrySetResult(null);
+                }),
+                // callback, 
+                cbPtr
+            );
+
+            if (result < Const.EOK)
+                throw new LibSmb2NativeMethodException(_contextPtr, result);
 
                 
-            return t.Task;
+            return tcs.Task;
             // return _share.GetDirectory(dirNameRelative);
         }
 

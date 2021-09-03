@@ -9,8 +9,8 @@ namespace LibSMB2Sharp.Native
         ///     Create an SMB2 context
         /// </summary>
         /// <returns>null on failure, smb_context structure on success</returns>
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_init_context", SetLastError = true)]
-        public static extern IntPtr smb2_init_context();
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern IntPtr smb2_init_context();
 
 
 
@@ -23,8 +23,8 @@ namespace LibSMB2Sharp.Native
         ///     the context is destroyed. Any pending async commands will be aborted with -ECONNRESET.
         /// </summary>
         /// <param name="smb2">smb2 context</param>
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern void smb2_destroy_context(IntPtr smb2);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_destroy_context(IntPtr smb2);
 
 
 
@@ -35,14 +35,14 @@ namespace LibSMB2Sharp.Native
         /*
          * Returns the file descriptor that libsmb2 uses.
          */
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_init_context", SetLastError = true)]
-        public static extern int smb2_get_fd(IntPtr smb2);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_get_fd(IntPtr smb2);
 
         /*
          * Returns which events that we need to poll for for the smb2 file descriptor.
          */
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_init_context", SetLastError = true)]
-        public static extern int smb2_which_events(IntPtr smb2);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_which_events(IntPtr smb2);
         /*
          * Called to process the events when events become available for the smb2
          * file descriptor.
@@ -53,8 +53,8 @@ namespace LibSMB2Sharp.Native
          *      used and must be freed by calling smb2_destroy_context().
          *
          */
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_init_context", SetLastError = true)]
-        public static extern int smb2_service(IntPtr smb2, int revents);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_service(IntPtr smb2, int revents);
 
 
         /// <summary>
@@ -67,8 +67,8 @@ namespace LibSMB2Sharp.Native
         ///     This is a combination of the flags SMB2_NEGOTIATE_SIGNING_ENABLED
         ///     and  SMB2_NEGOTIATE_SIGNING_REQUIRED
         /// </param>
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern void smb2_set_security_mode(IntPtr smb2, UInt16 security_mode);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_set_security_mode(IntPtr smb2, UInt16 security_mode);
         
 
 
@@ -78,8 +78,8 @@ namespace LibSMB2Sharp.Native
         /// </summary>
         /// <param name="smb2">smb2 context</param>
         /// <param name="user">user ID to use for authentication</param>
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern void smb2_set_user(IntPtr smb2, string user);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_set_user(IntPtr smb2, string user);
 
 
 
@@ -88,8 +88,8 @@ namespace LibSMB2Sharp.Native
         /// </summary>
         /// <param name="smb2">smb2 context</param>
         /// <param name="workstation">Password to authenticate with</param>
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern void smb2_set_password(IntPtr smb2, string password);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_set_password(IntPtr smb2, string password);
 
         
 
@@ -98,8 +98,8 @@ namespace LibSMB2Sharp.Native
         /// </summary>
         /// <param name="smb2">smb2 context</param>
         /// <param name="domain">Domain to authenticate with</param>
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern void smb2_set_domain(IntPtr smb2, string domain);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_set_domain(IntPtr smb2, string domain);
 
 
 
@@ -108,15 +108,15 @@ namespace LibSMB2Sharp.Native
         /// </summary>
         /// <param name="smb2">smb2 context</param>
         /// <param name="workstation">Workstation to authenticate as</param>        
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern void smb2_set_workstation(IntPtr smb2, string workstation);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_set_workstation(IntPtr smb2, string workstation);
 
 
 
         /*
         * Returns the client_guid for this context.
         */
-        public static string smb2_get_client_guid(IntPtr smb2)
+        internal static string smb2_get_client_guid(IntPtr smb2)
         {
             IntPtr ptr = _smb2_get_client_guid(smb2);
 
@@ -125,7 +125,7 @@ namespace LibSMB2Sharp.Native
             return error;
         }
 
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_get_client_guid", SetLastError = true)]
+        [DllImport("libsmb2", EntryPoint = "smb2_get_client_guid", SetLastError = true)]
         private static extern IntPtr _smb2_get_client_guid(IntPtr smb2);
 
 
@@ -179,8 +179,8 @@ namespace LibSMB2Sharp.Native
         ///     0      : Connected to the share successfully.
         ///     -errno : Failure.
         /// </returns>
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_connect_share(IntPtr smb2, string server, string share, string user);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_connect_share(IntPtr smb2, string server, string share, string user);
 
 
         /*
@@ -209,8 +209,8 @@ namespace LibSMB2Sharp.Native
         ///     0      : Disconnected from the share successfully.
         ///     -errno : Failure.
         /// </returns>
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_disconnect_share", SetLastError = true)]
-        public static extern int smb2_disconnect_share(IntPtr smb2);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_disconnect_share(IntPtr smb2);
 
 
 
@@ -229,8 +229,8 @@ namespace LibSMB2Sharp.Native
         ///     If there was a problem with the provided url format, a null will be returned. Otherwise,
         ///     a structure containing each portion of the parsed url will be returned.
         /// </returns>
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_parse_url", SetLastError = true)]
-        public static extern IntPtr smb2_parse_url(IntPtr smb2, string url);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern IntPtr smb2_parse_url(IntPtr smb2, string url);
 
 
         
@@ -238,8 +238,8 @@ namespace LibSMB2Sharp.Native
         ///     Free up any resources used by the provided url structure
         /// </summary>
         /// <param name="url">pointer to the URL to destroy</param>
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_destroy_url", SetLastError = true)]
-        public static extern void smb2_destroy_url(IntPtr url);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_destroy_url(IntPtr url);
 
 
 
@@ -248,7 +248,7 @@ namespace LibSMB2Sharp.Native
         /// </summary>
         /// <param name="smb2">smb2 context</param>
         /// <returns>String description of last error</returns>
-        public static string smb2_get_error(IntPtr smb2)
+        internal static string smb2_get_error(IntPtr smb2)
         {
             IntPtr ptr = _smb2_get_error(smb2);
 
@@ -259,7 +259,7 @@ namespace LibSMB2Sharp.Native
             return error;
         }
 
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_get_error", SetLastError = true)]
+        [DllImport("libsmb2", EntryPoint = "smb2_get_error", SetLastError = true)]
         private static extern IntPtr _smb2_get_error(IntPtr smb2);
    
         
@@ -289,8 +289,8 @@ namespace LibSMB2Sharp.Native
         /// <param name="smb2">smb2 context</param>
         /// <param name="path">Path to open</param>
         /// <returns>null on error, smb2dir structure on success</returns>
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_opendir", SetLastError = true)]
-        public static extern IntPtr smb2_opendir(IntPtr smb2, string path);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern IntPtr smb2_opendir(IntPtr smb2, string path);
 
 
 
@@ -299,8 +299,8 @@ namespace LibSMB2Sharp.Native
         /// </summary>
         /// <param name="smb2">smb2 context</param>
         /// <param name="smb2dir">directory context</param>
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "smb2_closedir", SetLastError = true)]
-        public static extern void smb2_closedir(IntPtr smb2, IntPtr smb2dir);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_closedir(IntPtr smb2, IntPtr smb2dir);
 
 
 
@@ -314,8 +314,8 @@ namespace LibSMB2Sharp.Native
         ///     null if no further files in the directory or
         ///     smb2dirent structure describing the entry
         /// </returns>
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern IntPtr smb2_readdir(IntPtr smb2, IntPtr dir);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern IntPtr smb2_readdir(IntPtr smb2, IntPtr dir);
 
 
 
@@ -325,8 +325,8 @@ namespace LibSMB2Sharp.Native
         /*
         * smb2_rewinddir() never blocks, thus no async version is needed.
         */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern void smb2_rewinddir(IntPtr smb2, IntPtr smb2dir);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_rewinddir(IntPtr smb2, IntPtr smb2dir);
 
 
 
@@ -336,8 +336,8 @@ namespace LibSMB2Sharp.Native
         /*
         * smb2_telldir() never blocks, thus no async version is needed.
         */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern long smb2_telldir(IntPtr smb2, IntPtr smb2dir);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern long smb2_telldir(IntPtr smb2, IntPtr smb2dir);
 
 
 
@@ -347,8 +347,8 @@ namespace LibSMB2Sharp.Native
         /*
         * smb2_seekdir() never blocks, thus no async version is needed.
         */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern void smb2_seekdir(IntPtr smb2, IntPtr smb2dir, long loc);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_seekdir(IntPtr smb2, IntPtr smb2dir, long loc);
 
 
 
@@ -385,8 +385,8 @@ namespace LibSMB2Sharp.Native
          * Returns NULL on failure.
           returns smb2fh
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern IntPtr smb2_open(IntPtr smb2, string path, int flags);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern IntPtr smb2_open(IntPtr smb2, string path, int flags);
 
 
         /*
@@ -408,8 +408,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync close()
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_close(IntPtr smb2, IntPtr fh);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_close(IntPtr smb2, IntPtr fh);
 
 
 
@@ -437,8 +437,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync fsync()
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_fsync(IntPtr smb2, IntPtr fh);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_fsync(IntPtr smb2, IntPtr fh);
 
 
 
@@ -446,13 +446,13 @@ namespace LibSMB2Sharp.Native
          * GetMaxReadWriteSize
          * SMB2 servers have a maximum size for read/write data that they support.
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern ulong smb2_get_max_read_size(IntPtr smb2);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern ulong smb2_get_max_read_size(IntPtr smb2);
 
 
         
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern ulong smb2_get_max_write_size(IntPtr smb2);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern ulong smb2_get_max_write_size(IntPtr smb2);
 
 
 
@@ -485,8 +485,8 @@ namespace LibSMB2Sharp.Native
          * Use smb2_get_max_read_size to discover the maximum data size that the
          * server supports.
          */
-         [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_pread(IntPtr smb2, IntPtr fh, IntPtr buf, uint count, ulong offset);
+         [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_pread(IntPtr smb2, IntPtr fh, IntPtr buf, uint count, ulong offset);
 
 
 
@@ -518,8 +518,8 @@ namespace LibSMB2Sharp.Native
          * Use smb2_get_max_write_size to discover the maximum data size that the
          * server supports.
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_pwrite(IntPtr smb2, IntPtr fh, IntPtr buf, uint count, ulong offset);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_pwrite(IntPtr smb2, IntPtr fh, IntPtr buf, uint count, ulong offset);
 
 
 
@@ -547,8 +547,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync read()
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_read(IntPtr smb2, IntPtr fh, IntPtr buffer, UInt32 count);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_read(IntPtr smb2, IntPtr fh, IntPtr buffer, UInt32 count);
 
 
 
@@ -576,8 +576,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync write()
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_write(IntPtr smb2, IntPtr fh, IntPtr buf, uint count);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_write(IntPtr smb2, IntPtr fh, IntPtr buf, uint count);
 
 
 
@@ -587,7 +587,7 @@ namespace LibSMB2Sharp.Native
         /*
          * smb2_seek() never blocks, thus no async version is needed.
          */
-        // [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
+        // [DllImport("libsmb2", SetLastError = true)]
         // smb2_lseek(IntPtr smb2, IntPtr fh, int64_t offset, int whence, uint64_t *current_offset)
 
 
@@ -609,16 +609,16 @@ namespace LibSMB2Sharp.Native
          *
          * Command_data is always NULL.
          */
-        // [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        // public static extern int smb2_unlink_async(IntPtr smb2, const char *path, smb2_command_cb cb, void *cb_data);
+        // [DllImport("libsmb2", SetLastError = true)]
+        // internal static extern int smb2_unlink_async(IntPtr smb2, const char *path, smb2_command_cb cb, void *cb_data);
 
 
 
         /*
          * Sync unlink()
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_unlink(IntPtr smb2, string path);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_unlink(IntPtr smb2, string path);
 
 
 
@@ -646,8 +646,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync rmdir()
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_rmdir(IntPtr smb2, string path);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_rmdir(IntPtr smb2, string path);
 
 
 
@@ -668,16 +668,16 @@ namespace LibSMB2Sharp.Native
          *
          * Command_data is always NULL.
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_mkdir_async(IntPtr smb2, string path, smb2_command_cb cb, IntPtr cb_data);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_mkdir_async(IntPtr smb2, string path, smb2_command_cb cb, IntPtr cb_data);
 
 
 
         /*
          * Sync mkdir()
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_mkdir(IntPtr smb2, string path);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_mkdir(IntPtr smb2, string path);
 
 
 
@@ -707,8 +707,8 @@ namespace LibSMB2Sharp.Native
         /// <param name="path">path to stat</param>
         /// <param name="statvfs">pointer to smb2_statvfs object</param>
         /// <returns></returns>
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_statvfs(IntPtr smb2, string path, IntPtr statvfs);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_statvfs(IntPtr smb2, string path, IntPtr statvfs);
 
 
 
@@ -734,8 +734,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync fstat()
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_fstat(IntPtr smb2, IntPtr fh, IntPtr st);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_fstat(IntPtr smb2, IntPtr fh, IntPtr st);
 
 
 
@@ -757,8 +757,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync stat()
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_stat(IntPtr smb2, string path, IntPtr st);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_stat(IntPtr smb2, string path, IntPtr st);
 
 
 
@@ -781,8 +781,8 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync rename()
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_rename(IntPtr smb2, string oldpath, string newpath);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_rename(IntPtr smb2, string oldpath, string newpath);
 
 
 
@@ -808,8 +808,8 @@ namespace LibSMB2Sharp.Native
          *      0 : Success
          * -errno : An error occured.
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_truncate(IntPtr smb2, string path, ulong length);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_truncate(IntPtr smb2, string path, ulong length);
 
 
 
@@ -835,16 +835,16 @@ namespace LibSMB2Sharp.Native
          *      0 : Success
          * -errno : An error occured.
          */
-        [DllImport("libsmb2.so.3.0.0", SetLastError = true)]
-        public static extern int smb2_ftruncate(IntPtr smb2, IntPtr fh, ulong length);
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_ftruncate(IntPtr smb2, IntPtr fh, ulong length);
 
 
-        // public static extern int poll(pollfd fds, ulong nfds, int timeout);
+        // internal static extern int poll(pollfd fds, ulong nfds, int timeout);
 
 
-        [DllImport("libsmb2.so.3.0.0", EntryPoint = "poll", SetLastError = true)]
+        [DllImport("libsmb2", SetLastError = true)]
         // static inline int poll(struct pollfd pfd[], uint32_t size, int nvecs)
-        // public static extern int poll(struct pollfd pfd[], uint32_t size, int nvecs)
-        public static extern int poll(IntPtr fds, ulong nfds, int timeout);
+        // internal static extern int poll(struct pollfd pfd[], uint32_t size, int nvecs)
+        internal static extern int poll(IntPtr fds, ulong nfds, int timeout);
     }
 }

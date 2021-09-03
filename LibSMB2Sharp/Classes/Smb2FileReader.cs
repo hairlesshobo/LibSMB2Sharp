@@ -36,7 +36,7 @@ namespace LibSMB2Sharp
             this._fhPtr = Methods.smb2_open(_contextPtr, Helpers.CleanFilePathForNative(entry.RelativePath), Const.O_RDONLY);
 
             if (this._fhPtr == IntPtr.Zero)
-                throw new LibSmb2NativeMethodException(_contextPtr);
+                throw new LibSmb2NativeMethodException(_contextPtr, "Failed to open file");
         }
 
         public override void Flush()
@@ -72,7 +72,7 @@ namespace LibSMB2Sharp
             _position += bytesRead;
 
             if (bytesRead < 0)
-                throw new LibSmb2NativeMethodException(_contextPtr);
+                throw new LibSmb2NativeMethodException(_contextPtr, bytesRead);
 
             Marshal.Copy(_bufferPtr, buffer, offset, count);
 
