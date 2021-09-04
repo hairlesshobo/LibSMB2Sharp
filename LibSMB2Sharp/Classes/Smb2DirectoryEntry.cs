@@ -90,34 +90,34 @@ namespace LibSMB2Sharp
             return _share.GetDirectory(dirNameRelative);
         }
 
-        public Task<Smb2DirectoryEntry> CreateDirectoryAsync(string name)
-        {
-            if (_removed)
-                throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
+        //! DOES NOT WORK
+        //! CAUSES ERROR "free(): double free detected in tcache 2" to be emitted when application closes
+        // private Task<Smb2DirectoryEntry> CreateDirectoryAsync(string name)
+        // {
+        //     if (_removed)
+        //         throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
 
-            // TODO: impove name sanitization
+        //     // TODO: impove name sanitization
 
-            if (name.IndexOf('/') >= 0 || name.IndexOf('\\') >= 0)
-                throw new LibSmb2InvalidDirectoryNameException(name);
+        //     if (name.IndexOf('/') >= 0 || name.IndexOf('\\') >= 0)
+        //         throw new LibSmb2InvalidDirectoryNameException(name);
 
-            string dirNameRelative = $"{this.RelativePath}/{name}";
+        //     string dirNameRelative = $"{this.RelativePath}/{name}";
 
-            TaskCompletionSource<Smb2DirectoryEntry> tcs = new TaskCompletionSource<Smb2DirectoryEntry>();
+        //     TaskCompletionSource<Smb2DirectoryEntry> tcs = new TaskCompletionSource<Smb2DirectoryEntry>();
 
-            int result = Methods.smb2_mkdir_async(
-                _contextPtr, 
-                Helpers.CleanFilePathForNative(dirNameRelative), 
-                Helpers.AsyncCallback(async (_) => tcs.TrySetResult(await _share.GetDirectoryAsync(dirNameRelative))),
-                // Helpers.AsyncCallback(() => tcs.TrySetResult(_share.GetDirectory(dirNameRelative))),
-                // Helpers.AsyncCallback((_) => tcs.TrySetResult(null)),
-                IntPtr.Zero
-            );
+        //     int result = Methods.smb2_mkdir_async(
+        //         _contextPtr, 
+        //         Helpers.CleanFilePathForNative(dirNameRelative), 
+        //         Helpers.AsyncCallback(async (_) => tcs.TrySetResult(await _share.GetDirectoryAsync(dirNameRelative))),
+        //         IntPtr.Zero
+        //     );
 
-            if (result < Const.EOK)
-                throw new LibSmb2NativeMethodException(_contextPtr, result);
+        //     if (result < Const.EOK)
+        //         throw new LibSmb2NativeMethodException(_contextPtr, result);
                 
-            return tcs.Task;
-        }
+        //     return tcs.Task;
+        // }
 
         public virtual void Dispose()
             => Close();

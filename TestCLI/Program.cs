@@ -30,18 +30,11 @@ namespace TestCLI
             using (Smb2Context smb2 = new Smb2Context(connectionString: connString, password: password))
             {
                 Smb2Share share = smb2.OpenShare();
-                smb2.StartAsync();
 
-                Console.WriteLine("before");
-                await share.CreateDirectoryAsync("meow");
-                // await Task.Delay(4000);
-                // Smb2DirectoryEntry entry = share.GetDirectory("/meow");
-                Console.WriteLine("after");
-
-                // foreach (Smb2Entry entry in share.GetEntries())
-                // {
-                //     Console.WriteLine(entry.RelativePath);
-                // }
+                foreach (Smb2Entry entry in share.GetEntries())
+                {
+                    Console.WriteLine(entry.RelativePath);
+                }
 
                 // share.CreateDirectoryTree("/test/another/test/for/steve");
                 // Smb2DirectoryEntry dirEntry = share.GetDirectory("/test/");

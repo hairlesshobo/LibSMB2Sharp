@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace LibSMB2Sharp.Native
 {
-    public class Methods
+    internal class Methods
     {
         /// <summary>
         ///     Create an SMB2 context
@@ -279,7 +279,7 @@ namespace LibSMB2Sharp.Native
         * -errno : An error occured.
         *          Command_data is NULL.
         */       
-        // private static extern int smb2_opendir_async(IntPtr smb2, string path, smb2_command_cb cb, IntPtr cb_data);
+        // int smb2_opendir_async(IntPtr smb2, string path, smb2_command_cb cb, IntPtr cb_data);
 
 
 
@@ -610,7 +610,7 @@ namespace LibSMB2Sharp.Native
          * Command_data is always NULL.
          */
         // [DllImport("libsmb2", SetLastError = true)]
-        // internal static extern int smb2_unlink_async(IntPtr smb2, const char *path, smb2_command_cb cb, void *cb_data);
+        // int smb2_unlink_async(IntPtr smb2, const char *path, smb2_command_cb cb, void *cb_data);
 
 
 
@@ -668,8 +668,8 @@ namespace LibSMB2Sharp.Native
          *
          * Command_data is always NULL.
          */
-        [DllImport("libsmb2", SetLastError = true)]
-        internal static extern int smb2_mkdir_async(IntPtr smb2, string path, smb2_command_cb cb, IntPtr cb_data);
+        // [DllImport("libsmb2", SetLastError = true)]
+        // int smb2_mkdir_async(IntPtr smb2, string path, smb2_command_cb cb, IntPtr cb_data);
 
 
 
@@ -696,7 +696,8 @@ namespace LibSMB2Sharp.Native
          *      0 : Success. Command_data is struct smb2_statvfs
          * -errno : An error occured.
          */
-        // int smb2_statvfs_async(IntPtr smb2, const char *path, struct smb2_statvfs *statvfs, smb2_command_cb cb, void *cb_data);
+        // [DllImport("libsmb2", SetLastError = true)]
+        // int smb2_statvfs_async(IntPtr smb2, string path, IntPtr statvfs, smb2_command_cb cb, IntPtr cb_data);
 
 
 
@@ -751,8 +752,8 @@ namespace LibSMB2Sharp.Native
          *      0 : Success. Command_data is struct smb2_stat_64
          * -errno : An error occured.
          */
-        [DllImport("libsmb2", SetLastError = true)]
-        internal static extern int smb2_stat_async(IntPtr smb2, string path, IntPtr st, smb2_command_cb cb, IntPtr cb_data);
+        // [DllImport("libsmb2", EntryPoint = "smb2_stat_async", SetLastError = true)]
+        // int smb2_stat_async(IntPtr smb2, string path, IntPtr st, smb2_command_cb cb, IntPtr cb_data);
 
 
         /*

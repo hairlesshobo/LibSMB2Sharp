@@ -11,12 +11,12 @@ namespace LibSMB2Sharp
     public class Smb2Context : IDisposable
     {
         private bool _started = false;
-        private IntPtr _contextPtr = IntPtr.Zero;
+        public IntPtr _contextPtr = IntPtr.Zero;
         private IntPtr _urlPtr = IntPtr.Zero;
 
         private Smb2Share _share = null;
-        private Task _asyncRunnerTask = Task.CompletedTask;
-        private CancellationTokenSource _cts = new CancellationTokenSource();
+        // private Task _asyncRunnerTask = Task.CompletedTask; // reserved for future async
+        // private CancellationTokenSource _cts = new CancellationTokenSource(); // reserved for future async
 
         public string UncPath => $"smb://{this.Server}";
         public string ConnectionString { get; private set; }
@@ -86,58 +86,57 @@ namespace LibSMB2Sharp
         }
 
 
-        /// <summary>
-        /// !!! DO NOT USE !!!
-        /// !!! DOES NOT WORK YET !!!
-        /// Start the async polling on the libsmb2 side
-        /// </summary>
-        public void StartAsync()
-        {
-            _asyncRunnerTask = Task.Run(() => 
-            {
-                pollfd pfd = new pollfd();
-                IntPtr pfdPtr = IntPtr.Zero;
+        // /// <summary>
+        // /// !!! ASYNC IS NOT YET SUPPORTED !!!
+        // /// Start the async polling on the libsmb2 side
+        // /// </summary>
+        // private void StartAsync()
+        // {
+        //     _asyncRunnerTask = Task.Run(() => 
+        //     {
+        //         pollfd pfd = new pollfd();
+        //         IntPtr pfdPtr = IntPtr.Zero;
 
-                try
-                {
-                    pfdPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(pollfd)));
+        //         try
+        //         {
+        //             pfdPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(pollfd)));
 
-                    while (!_cts.Token.IsCancellationRequested) 
-                    {
-                        pfd.fd = Methods.smb2_get_fd(_contextPtr);
-                        pfd.events = (short)Methods.smb2_which_events(_contextPtr);
+        //             while (!_cts.Token.IsCancellationRequested) 
+        //             {
+        //                 pfd.fd = Methods.smb2_get_fd(_contextPtr);
+        //                 pfd.events = (short)Methods.smb2_which_events(_contextPtr);
 
-                        Marshal.StructureToPtr(pfd, pfdPtr, false);
+        //                 Marshal.StructureToPtr(pfd, pfdPtr, false);
 
-                        int result = Methods.poll(pfdPtr, 1, 250);
+        //                 int result = Methods.poll(pfdPtr, 1, 250);
 
-                        if (result < Const.EOK)
-                            throw new Win32Exception(Marshal.GetLastWin32Error());
+        //                 if (result < Const.EOK)
+        //                     throw new Win32Exception(Marshal.GetLastWin32Error());
 
-                        pfd = Marshal.PtrToStructure<pollfd>(pfdPtr);
+        //                 pfd = Marshal.PtrToStructure<pollfd>(pfdPtr);
 
-                        if (pfd.revents == 0)
-                                continue;
+        //                 if (pfd.revents == 0)
+        //                         continue;
 
-                        result = Methods.smb2_service(_contextPtr, pfd.revents);
+        //                 result = Methods.smb2_service(_contextPtr, pfd.revents);
 
-                        if (result < Const.EOK)
-                            throw new LibSmb2NativeMethodException(_contextPtr, result);
-                    }
-                }
-                finally
-                {
-                    if (pfdPtr != IntPtr.Zero)
-                        Marshal.FreeHGlobal(pfdPtr);
-                }
-            });
-        }
+        //                 if (result < Const.EOK)
+        //                     throw new LibSmb2NativeMethodException(_contextPtr, result);
+        //             }
+        //         }
+        //         finally
+        //         {
+        //             if (pfdPtr != IntPtr.Zero)
+        //                 Marshal.FreeHGlobal(pfdPtr);
+        //         }
+        //     });
+        // }
 
 
         public void Dispose()
         {
-            if (_asyncRunnerTask != Task.CompletedTask && !_asyncRunnerTask.IsCompleted)
-                _cts.Cancel();
+            // if (_asyncRunnerTask != Task.CompletedTask && !_asyncRunnerTask.IsCompleted)
+            //     _cts.Cancel();
 
             if (_share != null)
             {

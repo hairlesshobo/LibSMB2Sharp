@@ -41,36 +41,36 @@ namespace LibSMB2Sharp
 
             this.SetDetails(ref dirEnt);
 
-            IntPtr ptr = IntPtr.Zero;
+            // IntPtr ptr = IntPtr.Zero;
 
-            try
-            {
-                ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(smb2_statvfs)));
+            // try
+            // {
+            //     ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(smb2_statvfs)));
 
-                int result = Methods.smb2_statvfs(_contextPtr, "", ptr);
+            //     int result = Methods.smb2_statvfs(_contextPtr, "", ptr);
 
-                if (result < Const.EOK)
-                    throw new LibSmb2NativeMethodException(_contextPtr, result);
+            //     if (result < Const.EOK)
+            //         throw new LibSmb2NativeMethodException(_contextPtr, result);
 
-                smb2_statvfs statvfs = Marshal.PtrToStructure<smb2_statvfs>(ptr);
+            //     smb2_statvfs statvfs = Marshal.PtrToStructure<smb2_statvfs>(ptr);
 
-                this.FsBlockSize = statvfs.f_bsize;
-                this.FsFragementSize = statvfs.f_frsize;
-                this.FsBlocks = statvfs.f_blocks;
-                this.FsBlocksFree = statvfs.f_bfree;
-                this.FsBlocksAvailable = statvfs.f_bavail;
-                this.FsFiles = statvfs.f_files;
-                this.FsFilesFree = statvfs.f_ffree;
-                this.FsFilesAvailable = statvfs.f_favail;
-                this.FsID = statvfs.f_fsid;
-                this.FsFlag = statvfs.f_flag;
-                this.FsNameMax = statvfs.f_namemax;
-            }
-            finally
-            {
-                if (ptr != IntPtr.Zero)
-                    Marshal.FreeHGlobal(ptr);
-            }
+            //     this.FsBlockSize = statvfs.f_bsize;
+            //     this.FsFragementSize = statvfs.f_frsize;
+            //     this.FsBlocks = statvfs.f_blocks;
+            //     this.FsBlocksFree = statvfs.f_bfree;
+            //     this.FsBlocksAvailable = statvfs.f_bavail;
+            //     this.FsFiles = statvfs.f_files;
+            //     this.FsFilesFree = statvfs.f_ffree;
+            //     this.FsFilesAvailable = statvfs.f_favail;
+            //     this.FsID = statvfs.f_fsid;
+            //     this.FsFlag = statvfs.f_flag;
+            //     this.FsNameMax = statvfs.f_namemax;
+            // }
+            // finally
+            // {
+            //     if (ptr != IntPtr.Zero)
+            //         Marshal.FreeHGlobal(ptr);
+            // }
         }
 
         public Smb2DirectoryEntry CreateDirectoryTree(string path)
@@ -135,25 +135,25 @@ namespace LibSMB2Sharp
             return dirEntry;
         }
 
-        public async Task<Smb2DirectoryEntry> GetDirectoryAsync(string path, bool throwOnMissing = true)
-        {
-            path = path.Trim();
+        // private async Task<Smb2DirectoryEntry> GetDirectoryAsync(string path, bool throwOnMissing = true)
+        // {
+        //     path = path.Trim();
 
-            if (String.IsNullOrWhiteSpace(path))
-                return this;
+        //     if (String.IsNullOrWhiteSpace(path))
+        //         return this;
 
-            Smb2Entry entry = await GetEntryAsync(path, throwOnMissing);
+        //     Smb2Entry entry = await GetEntryAsync(path, throwOnMissing);
 
-            if (entry == null)
-                return null;
+        //     if (entry == null)
+        //         return null;
 
-            Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
+        //     Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
 
-            if (dirEntry == null)
-                throw new LibSmb2NotADirectoryException(path);
+        //     if (dirEntry == null)
+        //         throw new LibSmb2NotADirectoryException(path);
 
-            return dirEntry;
-        }
+        //     return dirEntry;
+        // }
 
         public Smb2FileEntry GetFile(string path)
         {
@@ -184,22 +184,22 @@ namespace LibSMB2Sharp
             return Helpers.GenerateEntry(_contextPtr, ref dirEnt, this, containingDir: dirName);
         }
 
-        public async Task<Smb2Entry> GetEntryAsync(string path, bool throwOnMissing = true)
-        {
-            smb2dirent? dirEntN = await this.GetDirEntAsync(path, throwOnMissing);
+        // public async Task<Smb2Entry> GetEntryAsync(string path, bool throwOnMissing = true)
+        // {
+        //     smb2dirent? dirEntN = await this.GetDirEntAsync(path, throwOnMissing);
 
-            if (dirEntN == null)
-                return null;
+        //     if (dirEntN == null)
+        //         return null;
 
-            smb2dirent dirEnt = dirEntN.Value;
+        //     smb2dirent dirEnt = dirEntN.Value;
 
-            string dirName = Path.GetDirectoryName(path);
+        //     string dirName = Path.GetDirectoryName(path);
 
-            if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
-                dirName = Path.GetDirectoryName(dirName);
+        //     if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
+        //         dirName = Path.GetDirectoryName(dirName);
 
-            return Helpers.GenerateEntry(_contextPtr, ref dirEnt, this, containingDir: dirName);
-        }
+        //     return Helpers.GenerateEntry(_contextPtr, ref dirEnt, this, containingDir: dirName);
+        // }
 
         private smb2dirent? GetDirEnt(string path, bool throwOnMissing = true)
         {
@@ -226,30 +226,30 @@ namespace LibSMB2Sharp
             return dirEnt;
         }
 
-        private async Task<Nullable<smb2dirent>> GetDirEntAsync(string path, bool throwOnMissing = true)
-        {
-            path = Helpers.CleanFilePath(path);
+        // private async Task<Nullable<smb2dirent>> GetDirEntAsync(string path, bool throwOnMissing = true)
+        // {
+        //     path = Helpers.CleanFilePath(path);
 
-            smb2_stat_64? stat = await Helpers.StatAsync(_contextPtr, path);
+        //     smb2_stat_64? stat = await Helpers.StatAsync(_contextPtr, path);
 
-            if (stat == null)
-            {
-                if (throwOnMissing)
-                    throw new LibSmb2FileNotFoundException(path);
-                else
-                    return null;
-            } 
+        //     if (stat == null)
+        //     {
+        //         if (throwOnMissing)
+        //             throw new LibSmb2FileNotFoundException(path);
+        //         else
+        //             return null;
+        //     } 
 
-            path = path.TrimEnd('/');
+        //     path = path.TrimEnd('/');
 
-            smb2dirent dirEnt = new smb2dirent()
-            {
-                name = Path.GetFileName(path),
-                st = stat.Value
-            };
+        //     smb2dirent dirEnt = new smb2dirent()
+        //     {
+        //         name = Path.GetFileName(path),
+        //         st = stat.Value
+        //     };
 
-            return dirEnt;
-        }
+        //     return dirEnt;
+        // }
 
 
         public override void Dispose()
