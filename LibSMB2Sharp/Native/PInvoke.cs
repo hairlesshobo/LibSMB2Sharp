@@ -57,6 +57,30 @@ namespace LibSMB2Sharp.Native
         internal static extern int smb2_service(IntPtr smb2, int revents);
 
 
+
+        /// <summary>
+        ///     Set the timeout in seconds after which a command will be aborted with
+        ///     SMB2_STATUS_IO_TIMEOUT.
+        ///     If you use timeouts with the async API you must make sure to call
+        ///     smb2_service() at least once every second.
+        /// 
+        ///     Default is 0: No timeout.
+        /// </summary>
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_set_timeout(IntPtr smb2, int seconds);
+
+
+
+        /// <summary>
+        ///     Set the version that is allowed to make the connection
+        /// </summary>
+        /// <param name="smb2">Pointer to smb2 context</param>
+        /// <param name="version">Version that is allowed</param>
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_set_version(IntPtr smb2, smb2_negotiate_version version);
+
+
+
         /// <summary>
         /// Set the security mode for the connection.
         /// 
@@ -70,6 +94,37 @@ namespace LibSMB2Sharp.Native
         [DllImport("libsmb2", SetLastError = true)]
         internal static extern void smb2_set_security_mode(IntPtr smb2, UInt16 security_mode);
         
+
+
+        /*
+         * Set whether smb3 encryption should be used or not.
+         * 0  : disable encryption. This is the default.
+         * !0 : enable encryption.
+         */
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_set_seal(IntPtr smb2, int val);
+
+
+
+        /*
+         * Set whether smb2 signing should be required or not
+         * 0  : do not require signing. This is the default.
+         * !0 : require signing.
+         */
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_set_sign(IntPtr smb2, int val);
+
+
+
+        /*
+         * Set authentication method.
+         * SMB2_SEC_UNDEFINED (use KRB if available or NTLM if not)
+         * SMB2_SEC_NTLMSSP
+         * SMB2_SEC_KRB5
+         */
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern void smb2_set_authentication(IntPtr smb2, int val);
+
 
 
         /// <summary>
@@ -841,12 +896,60 @@ namespace LibSMB2Sharp.Native
         internal static extern int smb2_ftruncate(IntPtr smb2, IntPtr fh, ulong length);
 
 
-        // internal static extern int poll(pollfd fds, ulong nfds, int timeout);
+
+        /*
+         * READLINK
+         */
+        /*
+         * Async readlink()
+         *
+         * Returns
+         *  0     : The operation was initiated. The link content will be
+         *          reported through the callback function.
+         * -errno : There was an error. The callback function will not be invoked.
+         *
+         * When the callback is invoked, status indicates the result:
+         *      0 : Success. Command_data is the link content.
+         * -errno : An error occured.
+         */
+        // [DllImport("libsmb2", SetLastError = true)]
+        // int smb2_readlink_async(IntPtr smb2, string path, smb2_command_cb cb, IntPtr cb_data);
+
+        /*
+         * Sync readlink()
+         */
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_readlink(IntPtr smb2, string path, IntPtr buf, UInt32 bufsiz);
+
+
+
+        /*
+         * Async echo()
+         *
+         * Returns
+         *  0     : The operation was initiated. Result of the operation will be
+         *          reported through the callback function.
+         * -errno : There was an error. The callback function will not be invoked.
+         *
+         * When the callback is invoked, status indicates the result:
+         *      0 : Success.
+         * -errno : An error occured.
+         */
+        // int smb2_echo_async(IntPtr smb2, smb2_command_cb cb, void *cb_data);
+
+        /*
+         * Sync echo()
+         *
+         * Returns:
+         * 0      : successfully send the message and received a reply.
+         * -errno : Failure.
+         */
+        [DllImport("libsmb2", SetLastError = true)]
+        internal static extern int smb2_echo(IntPtr smb2);
+
 
 
         [DllImport("libsmb2", SetLastError = true)]
-        // static inline int poll(struct pollfd pfd[], uint32_t size, int nvecs)
-        // internal static extern int poll(struct pollfd pfd[], uint32_t size, int nvecs)
         internal static extern int poll(IntPtr fds, ulong nfds, int timeout);
     }
 }

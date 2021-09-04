@@ -29,6 +29,22 @@ namespace LibSMB2Sharp.Native
         public const UInt32 SMB2_TYPE_DIRECTORY = 0x00000001;
 
         /*
+         * Set which version of SMB to negotiate.
+         * Default is to let the server pick the version.
+         */
+        public enum smb2_negotiate_version 
+        {
+            SMB2_VERSION_ANY  = 0,
+            SMB2_VERSION_ANY2 = 2,
+            SMB2_VERSION_ANY3 = 3,
+            SMB2_VERSION_0202 = 0x0202,
+            SMB2_VERSION_0210 = 0x0210,
+            SMB2_VERSION_0300 = 0x0300,
+            SMB2_VERSION_0302 = 0x0302,
+            SMB2_VERSION_0311 = 0x0311
+        };
+
+        /*
          * File open flags
          */
         public const int O_RDONLY = 00;
