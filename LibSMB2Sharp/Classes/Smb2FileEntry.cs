@@ -46,7 +46,12 @@ namespace LibSMB2Sharp
             if (_locked)
                 throw new LibSmb2FileLockedException(this.RelativePath);
 
-            throw new NotImplementedException();
+            int result = Methods.smb2_unlink(this.Context.Pointer, Helpers.CleanFilePathForNative(this.RelativePath));
+
+            if (result < 0)
+                throw new LibSmb2NativeMethodException(this.Context, result);
+
+            this._removed = true;
         }
 
         internal void LockFile()

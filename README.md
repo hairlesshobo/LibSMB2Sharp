@@ -51,23 +51,23 @@ their current implementation status in this wrapper library.
 * smb2_set_workstation
 * smb2_stat
 * smb2_statvfs
+* smb2_unlink
 
 
 ### P/Invoke signature created, not implemented yet
 --------------------------------------------------
+* smb2_echo
 * smb2_fstat
 * smb2_ftruncate
+* smb2_lseek
 * smb2_pread
 * smb2_pwrite
+* smb2_readlink
 * smb2_rewinddir
-* smb2_lseek
 * smb2_seekdir
 * smb2_telldir
 * smb2_truncate
-* smb2_unlink
 * smb2_write
-* smb2_echo
-* smb2_readlink
 
 
 ### In PInvoke.cs but NOT ported yet (Future scope):

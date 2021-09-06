@@ -30,7 +30,7 @@ namespace TestCLI
                 // share.CreateDirectoryTree("/test/another/test/for/steve");
                 // Smb2DirectoryEntry dirEntry = share.GetDirectory("/meow/");
                 Smb2FileEntry fileEntry = share.GetFile("/meow/doc2.txt");
-                // fileEntry.Remove();
+                fileEntry.Remove();
                 // fileEntry.Rename("doc2.txt");
 
                 // fileEntry.Move("/this/is/a/test/meow3");
