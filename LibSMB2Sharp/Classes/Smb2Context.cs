@@ -1,8 +1,5 @@
 using System;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp.Native;
 
@@ -11,7 +8,7 @@ namespace LibSMB2Sharp
     public class Smb2Context : IDisposable
     {
         private bool _started = false;
-        public IntPtr _contextPtr = IntPtr.Zero;
+        internal IntPtr Pointer { get; private set; }
         private IntPtr _urlPtr = IntPtr.Zero;
 
         private Smb2Share _share = null;
@@ -37,20 +34,20 @@ namespace LibSMB2Sharp
             string share = null
             )
         {
-            _contextPtr = Methods.smb2_init_context();
+            this.Pointer = Methods.smb2_init_context();
 
-            if (_contextPtr == IntPtr.Zero)
+            if (this.Pointer == IntPtr.Zero)
                 throw new LibSmb2NativeMethodException("Failed to init context");
 
-            Methods.smb2_set_security_mode(_contextPtr, Const.SMB2_NEGOTIATE_SIGNING_ENABLED);
+            Methods.smb2_set_security_mode(this.Pointer, Const.SMB2_NEGOTIATE_SIGNING_ENABLED);
 
             // connection string was provided, parse it
             if (!String.IsNullOrWhiteSpace(connectionString))
             {
-                _urlPtr = Methods.smb2_parse_url(_contextPtr, connectionString);
+                _urlPtr = Methods.smb2_parse_url(this.Pointer, connectionString);
 
                 if (_urlPtr == IntPtr.Zero)
-                    throw new LibSmb2NativeMethodException(_contextPtr, "Failed to parse url");
+                    throw new LibSmb2NativeMethodException(this.Pointer, "Failed to parse url");
 
                 smb2_url url = Marshal.PtrToStructure<smb2_url>(_urlPtr);
 
@@ -72,15 +69,15 @@ namespace LibSMB2Sharp
             if (_share != null)
                 return _share;
 
-            int result = Methods.smb2_connect_share(_contextPtr, this.Server, this.Share, this.User);
+            int result = Methods.smb2_connect_share(this.Pointer, this.Server, this.Share, this.User);
 
             if (result < Const.EOK)
-                throw new LibSmb2ConnectionException(_contextPtr, result);
+                throw new LibSmb2ConnectionException(this.Pointer, result);
 
-            _share = new Smb2Share(this, _contextPtr);
+            _share = new Smb2Share(this);
 
-            this.MaxReadSize = Methods.smb2_get_max_read_size(_contextPtr);
-            this.MaxWriteSize = Methods.smb2_get_max_write_size(_contextPtr);
+            this.MaxReadSize = Methods.smb2_get_max_read_size(this.Pointer);
+            this.MaxWriteSize = Methods.smb2_get_max_write_size(this.Pointer);
 
             return _share;
         }
@@ -103,8 +100,8 @@ namespace LibSMB2Sharp
 
         //             while (!_cts.Token.IsCancellationRequested) 
         //             {
-        //                 pfd.fd = Methods.smb2_get_fd(_contextPtr);
-        //                 pfd.events = (short)Methods.smb2_which_events(_contextPtr);
+        //                 pfd.fd = Methods.smb2_get_fd(this.Pointer);
+        //                 pfd.events = (short)Methods.smb2_which_events(this.Pointer);
 
         //                 Marshal.StructureToPtr(pfd, pfdPtr, false);
 
@@ -118,10 +115,10 @@ namespace LibSMB2Sharp
         //                 if (pfd.revents == 0)
         //                         continue;
 
-        //                 result = Methods.smb2_service(_contextPtr, pfd.revents);
+        //                 result = Methods.smb2_service(this.Pointer, pfd.revents);
 
         //                 if (result < Const.EOK)
-        //                     throw new LibSmb2NativeMethodException(_contextPtr, result);
+        //                     throw new LibSmb2NativeMethodException(this.Pointer, result);
         //             }
         //         }
         //         finally
@@ -150,11 +147,11 @@ namespace LibSMB2Sharp
                 _urlPtr = IntPtr.Zero;
             }
 
-            if (_contextPtr != IntPtr.Zero)
+            if (this.Pointer != IntPtr.Zero)
             {
-                Methods.smb2_disconnect_share(_contextPtr);
-                Methods.smb2_destroy_context(_contextPtr);
-                _contextPtr = IntPtr.Zero;
+                Methods.smb2_disconnect_share(this.Pointer);
+                Methods.smb2_destroy_context(this.Pointer);
+                this.Pointer = IntPtr.Zero;
             }
         }
 
@@ -170,7 +167,7 @@ namespace LibSMB2Sharp
             {
                 this.User = user;
 
-                Methods.smb2_set_user(_contextPtr, this.User);
+                Methods.smb2_set_user(this.Pointer, this.User);
             }
         }
 
@@ -183,7 +180,7 @@ namespace LibSMB2Sharp
             {
                 this.Password = password;
 
-                Methods.smb2_set_password(_contextPtr, this.Password);
+                Methods.smb2_set_password(this.Pointer, this.Password);
             }
         }
 
@@ -196,7 +193,7 @@ namespace LibSMB2Sharp
             {
                 this.Domain = domain;
 
-                Methods.smb2_set_domain(_contextPtr, this.Domain);
+                Methods.smb2_set_domain(this.Pointer, this.Domain);
             }
         }
 

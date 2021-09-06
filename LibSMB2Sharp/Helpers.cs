@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp.Native;
 
@@ -48,16 +46,16 @@ namespace LibSMB2Sharp
         // }
 
 
-        internal static void CloseDir(IntPtr contextPtr, ref IntPtr dirPtr)
+        internal static void CloseDir(Smb2Context context, ref IntPtr dirPtr)
         {
             if (dirPtr != IntPtr.Zero)
             {
-                Methods.smb2_closedir(contextPtr, dirPtr);
+                Methods.smb2_closedir(context.Pointer, dirPtr);
                 dirPtr = IntPtr.Zero;
             }
         }
 
-        internal static void OpenDir(IntPtr contextPtr, ref IntPtr dirPtr, string path = null)
+        internal static void OpenDir(Smb2Context context, ref IntPtr dirPtr, string path = null)
         {
             if (dirPtr == IntPtr.Zero)
             {
@@ -66,19 +64,19 @@ namespace LibSMB2Sharp
 
                 path = path.TrimStart('/');
                 
-                dirPtr = Methods.smb2_opendir(contextPtr, path);
+                dirPtr = Methods.smb2_opendir(context.Pointer, path);
 
                 if (dirPtr == IntPtr.Zero)
-                    throw new LibSmb2NativeMethodException(contextPtr, "Failed to open directory");
+                    throw new LibSmb2NativeMethodException(context.Pointer, "Failed to open directory");
             }
         }
 
-        internal static Smb2Entry GenerateEntry(IntPtr contextPtr, ref smb2dirent dirEnt, Smb2Share share, string containingDir = null, Smb2DirectoryEntry parent = null)
+        internal static Smb2Entry GenerateEntry(Smb2Share share, ref smb2dirent dirEnt, string containingDir = null, Smb2DirectoryEntry parent = null)
         {
             if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
-                return new Smb2DirectoryEntry(contextPtr, share, ref dirEnt, containingDir, parent);
+                return new Smb2DirectoryEntry(share, ref dirEnt, containingDir, parent);
             else
-                return new Smb2FileEntry(contextPtr, share, ref dirEnt, containingDir, parent);
+                return new Smb2FileEntry(share, ref dirEnt, containingDir, parent);
         }
 
         // TODO: Add ability to strip leading server info, if present
@@ -89,7 +87,7 @@ namespace LibSMB2Sharp
             => path.Replace('\\', '/').Replace("//", "/").TrimStart('.');
 
 
-        internal static smb2_stat_64? Stat(IntPtr contextPtr, string path)
+        internal static smb2_stat_64? Stat(Smb2Context context, string path)
         {
             IntPtr ptr = IntPtr.Zero;
 
@@ -97,13 +95,13 @@ namespace LibSMB2Sharp
             {
                 ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(smb2_stat_64)));
 
-                int result = Methods.smb2_stat(contextPtr, CleanFilePathForNative(path), ptr);
+                int result = Methods.smb2_stat(context.Pointer, CleanFilePathForNative(path), ptr);
 
                 if (result == -Const.ENOENT)
                     return null;
 
                 if (ptr == IntPtr.Zero || result < Const.EOK)
-                    throw new LibSmb2NativeMethodException(contextPtr, result);
+                    throw new LibSmb2NativeMethodException(context.Pointer, result);
 
                 return Marshal.PtrToStructure<smb2_stat_64>(ptr);
             }
@@ -116,14 +114,14 @@ namespace LibSMB2Sharp
 
         //! DOES NOT WORK
         //! causes error "free(): double free detected in tcache 2" to be emitted on program termination
-        // private static Task<Nullable<smb2_stat_64>> StatAsync(IntPtr contextPtr, string path)
+        // private static Task<Nullable<smb2_stat_64>> StatAsync(Smb2Context context, string path)
         // {
         //     TaskCompletionSource<Nullable<smb2_stat_64>> tcs = new TaskCompletionSource<Nullable<smb2_stat_64>>();
 
         //     IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(smb2_stat_64)));
 
         //     int result = Methods.smb2_stat_async(
-        //         contextPtr, 
+        //         Context.Pointer, 
         //         Helpers.CleanFilePathForNative(path), 
         //         ptr, 
         //         Helpers.AsyncCallbackRaw((cbResult, dataPtr) => {
@@ -131,7 +129,7 @@ namespace LibSMB2Sharp
         //                 tcs.TrySetResult(null);
 
         //             if (dataPtr == IntPtr.Zero || cbResult < Const.EOK)
-        //                 throw new LibSmb2NativeMethodException(contextPtr, cbResult);
+        //                 throw new LibSmb2NativeMethodException(Context.Pointer, cbResult);
 
         //             smb2_stat_64 statResult = Marshal.PtrToStructure<smb2_stat_64>(dataPtr);
 
@@ -146,7 +144,7 @@ namespace LibSMB2Sharp
         //     );
 
         //     if (result < Const.EOK)
-        //         throw new LibSmb2NativeMethodException(contextPtr, result);
+        //         throw new LibSmb2NativeMethodException(Context.Pointer, result);
 
         //     return tcs.Task;
         // }

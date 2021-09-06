@@ -9,10 +9,11 @@ namespace LibSMB2Sharp
     public class Smb2FileReader : Stream
     {
         private long _position = 0;
-        private IntPtr _contextPtr = IntPtr.Zero;
         private IntPtr _fhPtr = IntPtr.Zero;
         private IntPtr _bufferPtr = IntPtr.Zero;
         private int _bufferSize = -1;
+
+        public Smb2Context Context { get; private set; }
 
         public override bool CanRead => true;
 
@@ -29,14 +30,14 @@ namespace LibSMB2Sharp
             set => throw new NotSupportedException();
         }
 
-        public Smb2FileReader(IntPtr contextPtr, Smb2FileEntry entry)
+        public Smb2FileReader(Smb2Context context, Smb2FileEntry entry)
         {
+            this.Context = context ?? throw new ArgumentNullException(nameof(context));
             this.FileEntry = entry ?? throw new ArgumentNullException(nameof(entry));
-            this._contextPtr = contextPtr;
-            this._fhPtr = Methods.smb2_open(_contextPtr, Helpers.CleanFilePathForNative(entry.RelativePath), Const.O_RDONLY);
+            this._fhPtr = Methods.smb2_open(this.Context.Pointer, Helpers.CleanFilePathForNative(entry.RelativePath), Const.O_RDONLY);
 
             if (this._fhPtr == IntPtr.Zero)
-                throw new LibSmb2NativeMethodException(_contextPtr, "Failed to open file");
+                throw new LibSmb2NativeMethodException(this.Context.Pointer, "Failed to open file");
         }
 
         public override void Flush()
@@ -67,12 +68,12 @@ namespace LibSMB2Sharp
             if (count == 0)
                 return 0;
             
-            int bytesRead = Methods.smb2_read(_contextPtr, _fhPtr, _bufferPtr, (uint)count);
+            int bytesRead = Methods.smb2_read(this.Context.Pointer, _fhPtr, _bufferPtr, (uint)count);
 
             _position += bytesRead;
 
             if (bytesRead < 0)
-                throw new LibSmb2NativeMethodException(_contextPtr, bytesRead);
+                throw new LibSmb2NativeMethodException(this.Context.Pointer, bytesRead);
 
             Marshal.Copy(_bufferPtr, buffer, offset, count);
 
@@ -98,7 +99,7 @@ namespace LibSMB2Sharp
         {
             if (_fhPtr != IntPtr.Zero)
             {
-                Methods.smb2_close(_contextPtr, _fhPtr);
+                Methods.smb2_close(this.Context.Pointer, _fhPtr);
                 _fhPtr = IntPtr.Zero;
             }
 

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using LibSMB2Sharp.Native;
 
@@ -37,7 +36,8 @@ namespace LibSMB2Sharp
         public DateTimeOffset CreateDtm { get; private protected  set; }
         public DateTimeOffset ModifyDtm { get; private protected set; }
         public Smb2EntryType Type { get; private protected set; }
-        public Smb2Share Share => (_isRootShare ? null : _share);
+        public Smb2Share Share => _share;
+        public virtual Smb2Context Context => this.Share.Context;
         private smb2dirent _dirEnt;
         private string _containingDir = null;
 
@@ -51,10 +51,10 @@ namespace LibSMB2Sharp
             this._parentDirEntry = parentDir;
             this._containingDir = containingDir;
 
-            this.SetDetails(ref dirEnt);
+            this.SetDirDetails(ref dirEnt);
         }
 
-        protected void SetDetails(ref smb2dirent dirEnt)
+        protected void SetDirDetails(ref smb2dirent dirEnt)
         {
             this.Name = dirEnt.name;
             this.Size = dirEnt.st.smb2_size;

@@ -13,7 +13,7 @@ namespace TestCLI
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             string connString = String.Empty;
             string password = String.Empty;
