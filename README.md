@@ -27,6 +27,7 @@ their current implementation status in this wrapper library.
 * smb2_destroy_context
 * smb2_destroy_url
 * smb2_disconnect_share
+* smb2_get_client_guid
 * smb2_get_error
 * smb2_get_max_read_size
 * smb2_get_max_write_size
@@ -37,37 +38,37 @@ their current implementation status in this wrapper library.
 * smb2_parse_url
 * smb2_read
 * smb2_readdir
+* smb2_rename
 * smb2_rmdir
-* smb2_set_security_mode
-* smb2_set_user
-* smb2_set_password
 * smb2_set_domain
+* smb2_set_password
+* smb2_set_seal
+* smb2_set_security_mode
+* smb2_set_sign
+* smb2_set_timeout
+* smb2_set_user
+* smb2_set_version
+* smb2_set_workstation
 * smb2_stat
 * smb2_statvfs
+
 
 ### P/Invoke signature created, not implemented yet
 --------------------------------------------------
 * smb2_fstat
 * smb2_ftruncate
-* smb2_get_client_guid
 * smb2_pread
 * smb2_pwrite
 * smb2_rewinddir
 * smb2_lseek
 * smb2_seekdir
-* smb2_set_workstation
 * smb2_telldir
 * smb2_truncate
-* smb2_rename
 * smb2_unlink
 * smb2_write
 * smb2_echo
 * smb2_readlink
-* smb2_set_authentication
-* smb2_set_seal
-* smb2_set_sign
-* smb2_set_timeout
-* smb2_set_version
+
 
 ### In PInvoke.cs but NOT ported yet (Future scope):
 --------------------------------------------------
@@ -120,6 +121,7 @@ their current implementation status in this wrapper library.
 * smb2_get_file_id
 * smb2_get_opaque
 * smb2_set_opaque
+* smb2_set_authentication
 
 
 ### Not in scope:
