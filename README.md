@@ -59,11 +59,8 @@ their current implementation status in this wrapper library.
 ### TODO
 --------------------------------------------------
 * Add ability to open a file for appending
+* Determine why DllImport cannot find entry point for smb2_fsync
 
-
-### P/Invoke signature created, not implemented yet
---------------------------------------------------
-* smb2_fsync
 
 
 ### In PInvoke.cs but NOT ported yet (Future scope):
