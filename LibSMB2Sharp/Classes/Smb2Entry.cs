@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp.Native;
 
 namespace LibSMB2Sharp
@@ -14,6 +15,7 @@ namespace LibSMB2Sharp
     {
         private smb2dirent _dirEnt;
 
+        protected bool _removed = false;
         protected Smb2DirectoryEntry _parentDirEntry = null;
         protected string _containingDir = null;
 
@@ -81,6 +83,45 @@ namespace LibSMB2Sharp
             this._parentDirEntry = parentDirEntry;
 
             return this._parentDirEntry;
+        }
+
+        protected void Move(string newPath, bool movingFile)
+        {
+            newPath = Helpers.CleanFilePath(newPath).TrimEnd('/');
+
+            smb2_stat_64? statResult = Helpers.Stat(this.Context, newPath);
+
+            if (statResult != null)
+            {
+                if (movingFile == false || statResult.Value.smb2_type == Const.SMB2_TYPE_FILE)
+                    throw new LibSmb2OperationNotAllowedException($"Cannot move directory, destination path already exists: {newPath}");
+            }
+
+            // we are moving to a directory, so we need to append the file name to the new path
+            if (statResult != null && statResult.Value.smb2_type == Const.SMB2_TYPE_DIRECTORY)
+                newPath += "/" + this.Name;
+
+            string newParentDirPath = "/";
+
+            if (newPath.LastIndexOf('/') > 0)
+                newParentDirPath = newPath.Substring(0, newPath.LastIndexOf('/'));
+
+            Smb2DirectoryEntry newParentDirEntry = this.Share.CreateDirectoryTree(newParentDirPath);
+
+            int result = Methods.smb2_rename(
+                this.Share.Context.Pointer, 
+                Helpers.CleanFilePathForNative(this.RelativePath), 
+                newPath
+            );
+            
+            if (result < 0)
+                throw new LibSmb2NativeMethodException(this.Context, result);
+
+            smb2dirent newDirEnt = Share.GetDirEnt(newPath, true) ?? throw new Exception();
+
+            this._parentDirEntry = newParentDirEntry;
+            this._containingDir = newParentDirPath;
+            this.SetDetailsFromDirEnt(ref newDirEnt);
         }
 
         public override string ToString()

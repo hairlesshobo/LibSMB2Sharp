@@ -9,7 +9,6 @@ namespace LibSMB2Sharp
 {
     public class Smb2DirectoryEntry : Smb2Entry, IDisposable
     {
-        private bool _removed = false;
         protected IntPtr _dirPtr = IntPtr.Zero;
 
         protected Smb2DirectoryEntry()
@@ -86,39 +85,12 @@ namespace LibSMB2Sharp
 
         public void Move(string newPath)
         {
-            newPath = Helpers.CleanFilePath(newPath).TrimEnd('/');
-
             if (_removed)
                 throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
 
-            smb2_stat_64? statResult = Helpers.Stat(this.Context, newPath);
-
-            if (statResult != null)
-                throw new LibSmb2OperationNotAllowedException($"Cannot move directory, destination path already exists: {newPath}");
-
             this.Close();
 
-            string newParentDirPath = "/";
-
-            if (newPath.LastIndexOf('/') > 0)
-                newParentDirPath = newPath.Substring(0, newPath.LastIndexOf('/'));
-
-            Smb2DirectoryEntry newParentDirEntry = this.Share.CreateDirectoryTree(newParentDirPath);
-
-            int result = Methods.smb2_rename(
-                this.Share.Context.Pointer, 
-                Helpers.CleanFilePathForNative(this.RelativePath), 
-                newPath
-            );
-            
-            if (result < 0)
-                throw new LibSmb2NativeMethodException(this.Context, result);
-
-            smb2dirent newDirEnt = Share.GetDirEnt(newPath, true) ?? throw new Exception();
-
-            this._parentDirEntry = newParentDirEntry;
-            this._containingDir = newParentDirPath;
-            this.SetDetailsFromDirEnt(ref newDirEnt);
+            base.Move(newPath, false);
         }
 
         //! DOES NOT WORK

@@ -35,6 +35,7 @@ namespace LibSMB2Sharp
             this.Context = context ?? throw new ArgumentNullException(nameof(context));
             this.FileEntry = entry ?? throw new ArgumentNullException(nameof(entry));
             this._fhPtr = Methods.smb2_open(this.Context.Pointer, Helpers.CleanFilePathForNative(entry.RelativePath), Const.O_RDONLY);
+            this.FileEntry.LockFile();
 
             if (this._fhPtr == IntPtr.Zero)
                 throw new LibSmb2NativeMethodException(this.Context.Pointer, "Failed to open file");
@@ -108,6 +109,8 @@ namespace LibSMB2Sharp
                 Marshal.FreeHGlobal(_bufferPtr);
                 _bufferPtr = IntPtr.Zero;
             }
+
+            this.FileEntry.UnlockFile();
         }
     }
 }

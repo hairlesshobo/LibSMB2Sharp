@@ -28,9 +28,12 @@ namespace TestCLI
                 Smb2Share share = smb2.OpenShare();
 
                 // share.CreateDirectoryTree("/test/another/test/for/steve");
-                Smb2DirectoryEntry dirEntry = share.GetDirectory("/meow/");
+                // Smb2DirectoryEntry dirEntry = share.GetDirectory("/meow/");
+                Smb2FileEntry fileEntry = share.GetFile("/meow/doc.txt");
 
-                dirEntry.Move("/this/is/a/test/meow3");
+                fileEntry.Move("/this/is/a/test/meow3");
+
+                // dirEntry.Move("/this/is/a/test/meow3");
 
                 // dirEntry.Remove();
 
@@ -39,11 +42,11 @@ namespace TestCLI
                 
                 
 
-                Console.WriteLine(JsonSerializer.Serialize(dirEntry, new JsonSerializerOptions()
+                Console.WriteLine(JsonSerializer.Serialize(fileEntry, new JsonSerializerOptions()
                 {
                     WriteIndented = true,
                     IgnoreNullValues = false,
-                    IncludeFields = true,
+                    // IncludeFields = true,
                     ReferenceHandler = ReferenceHandler.Preserve
                 }));
 
