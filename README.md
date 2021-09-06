@@ -27,6 +27,8 @@ their current implementation status in this wrapper library.
 * smb2_destroy_context
 * smb2_destroy_url
 * smb2_disconnect_share
+* smb2_echo
+* smb2_ftruncate
 * smb2_get_client_guid
 * smb2_get_error
 * smb2_get_max_read_size
@@ -52,22 +54,16 @@ their current implementation status in this wrapper library.
 * smb2_stat
 * smb2_statvfs
 * smb2_unlink
+* smb2_write
+
+### TODO
+--------------------------------------------------
+* Add ability to open a file for appending
 
 
 ### P/Invoke signature created, not implemented yet
 --------------------------------------------------
-* smb2_echo
-* smb2_fstat
-* smb2_ftruncate
-* smb2_lseek
-* smb2_pread
-* smb2_pwrite
-* smb2_readlink
-* smb2_rewinddir
-* smb2_seekdir
-* smb2_telldir
-* smb2_truncate
-* smb2_write
+* smb2_fsync
 
 
 ### In PInvoke.cs but NOT ported yet (Future scope):
@@ -88,6 +84,7 @@ their current implementation status in this wrapper library.
 * smb2_connect_share_async
 * smb2_disconnect_share_async
 * smb2_fstat_async
+* smb2_fsync_async
 * smb2_ftruncate_async
 * smb2_mkdir_async
 * smb2_share_enum_async
@@ -112,17 +109,28 @@ their current implementation status in this wrapper library.
 * smb2_fd_event_callbacks
 * smb2_get_fds
 
+### Not Planned
+--------------------------------------------------
+* smb2_fstat
+* smb2_lseek
+* smb2_pread
+* smb2_pwrite
+* smb2_readlink
+* smb2_rewinddir
+* smb2_seekdir
+* smb2_telldir
+* smb2_truncate
+
 
 ### Most likely not in scope:
 --------------------------------------------------
-* smb2_free_data
 * smb2_fh_from_file_id
+* smb2_free_data
 * smb2_get_file_id
 * smb2_get_file_id
 * smb2_get_opaque
-* smb2_set_opaque
 * smb2_set_authentication
-
+* smb2_set_opaque
 
 ### Not in scope:
 --------------------------------------------------

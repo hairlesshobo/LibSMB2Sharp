@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using LibSMB2Sharp;
@@ -27,21 +30,13 @@ namespace TestCLI
             {
                 Smb2Share share = smb2.OpenShare();
 
-                // share.CreateDirectoryTree("/test/another/test/for/steve");
-                // Smb2DirectoryEntry dirEntry = share.GetDirectory("/meow/");
-                Smb2FileEntry fileEntry = share.GetFile("/meow/doc2.txt");
-                fileEntry.Remove();
-                // fileEntry.Rename("doc2.txt");
+                Smb2FileEntry fileEntry = share.GetFile("/meow/doc2.txt", true);
 
-                // fileEntry.Move("/this/is/a/test/meow3");
-
-                // dirEntry.Move("/this/is/a/test/meow3");
-
-                // dirEntry.Remove();
-
-
-                // Smb2FileEntry entry = share.GetFile(".///original_lists//studio_corruptions.txt");
-                
+                using (Smb2FileWriter writer = fileEntry.OpenWriter())
+                {
+                    // writer.WriteLine("this is a test of the emergency broadcast system");
+                    writer.WriteLine("come on, does this actually work??");
+                }
                 
 
                 Console.WriteLine(JsonSerializer.Serialize(fileEntry, new JsonSerializerOptions()

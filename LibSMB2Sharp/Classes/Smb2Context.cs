@@ -227,6 +227,9 @@ namespace LibSMB2Sharp
             return _share;
         }
 
+        public void Echo()
+            => Methods.smb2_echo(this.Pointer);
+
         // /// <summary>
         // /// !!! ASYNC IS NOT YET SUPPORTED !!!
         // /// Start the async polling on the libsmb2 side

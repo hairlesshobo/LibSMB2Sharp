@@ -1,12 +1,13 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp.Native;
 
 namespace LibSMB2Sharp
 {
-    public class Smb2FileReader : Stream
+    public class Smb2FileWriter : Stream
     {
         private long _position = 0;
         private IntPtr _fhPtr = IntPtr.Zero;
@@ -15,13 +16,13 @@ namespace LibSMB2Sharp
 
         public Smb2Context Context { get; private set; }
 
-        public override bool CanRead => true;
+        public override bool CanRead => false;
 
         public override bool CanSeek => false;
 
-        public override bool CanWrite => false;
+        public override bool CanWrite => true;
 
-        public override long Length => (long)this.FileEntry.Size;
+        public override long Length => this.Position;
         public Smb2FileEntry FileEntry { get; private set; }
 
         public override long Position 
@@ -30,12 +31,14 @@ namespace LibSMB2Sharp
             set => throw new NotSupportedException();
         }
 
-        public Smb2FileReader(Smb2Context context, Smb2FileEntry entry)
+        public Smb2FileWriter(Smb2Context context, Smb2FileEntry entry)
         {
             this.Context = context ?? throw new ArgumentNullException(nameof(context));
             this.FileEntry = entry ?? throw new ArgumentNullException(nameof(entry));
-            this._fhPtr = Methods.smb2_open(this.Context.Pointer, Helpers.CleanFilePathForNative(entry.RelativePath), Const.O_RDONLY);
             this.FileEntry.LockFile();
+            
+            _fhPtr = Methods.smb2_open(this.Context.Pointer, Helpers.CleanFilePathForNative(entry.RelativePath), Const.O_WRONLY | Const.O_CREAT);
+            Methods.smb2_ftruncate(this.Context.Pointer, _fhPtr, 0);
 
             if (this._fhPtr == IntPtr.Zero)
                 throw new LibSmb2NativeMethodException(this.Context.Pointer, "Failed to open file");
@@ -48,9 +51,24 @@ namespace LibSMB2Sharp
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            throw new NotSupportedException();
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetLength(long value)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
             if (_fhPtr == IntPtr.Zero)
                 throw new LibSmb2FileAlreadyClosedException(this.FileEntry.RelativePath);
-                
+
             // the requested buffer size is different than the previous (or never set)
             // so we will need to allocate the buffer on this read
             if (count > this._bufferSize)
@@ -66,44 +84,46 @@ namespace LibSMB2Sharp
                 this._bufferSize = count;
             }
 
-            if ((this.Length - this.Position) < count)
-                count = (int)(this.Length - this.Position);
-
             if (count == 0)
-                return 0;
-            
-            int bytesRead = Methods.smb2_read(this.Context.Pointer, _fhPtr, _bufferPtr, (uint)count);
+                return;
 
-            _position += bytesRead;
+            Marshal.Copy(buffer, offset, _bufferPtr, count);
 
-            if (bytesRead < 0)
-                throw new LibSmb2NativeMethodException(this.Context, bytesRead);
+            int bytesWritten = Methods.smb2_write(this.Context.Pointer, _fhPtr, _bufferPtr, (uint)count);
 
-            Marshal.Copy(_bufferPtr, buffer, offset, count);
+            if (bytesWritten < 0)
+                throw new LibSmb2NativeMethodException(this.Context, bytesWritten);
 
-            return bytesRead;
+            if (bytesWritten != count)
+                throw new Exception("Unknown error occurred that caused smb2 to write less bytes than were provided!");
+
+            _position += bytesWritten;
         }
 
-        public override long Seek(long offset, SeekOrigin origin)
+        public void Write(string text)
         {
-            throw new NotImplementedException();
+            byte[] bytesToWrite = Encoding.UTF8.GetBytes(text);
+            this.Write(bytesToWrite, 0, bytesToWrite.Length);
         }
 
-        public override void SetLength(long value)
+        public void WriteLine(string text)
         {
-            throw new NotSupportedException();
-        }
-
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException();
+            this.Write(text);
+            this.Write(Environment.NewLine);
         }
 
         public override void Close()
         {
             if (_fhPtr != IntPtr.Zero)
             {
+                // flush whatever may be in memory
+                //! See PInvoke.cs:495 for an explanation for why this
+                //! is not being used 
+                // Methods.smb2_fsync(this.Context.Pointer, _fhPtr);
+
+                // close the file
                 Methods.smb2_close(this.Context.Pointer, _fhPtr);
+
                 _fhPtr = IntPtr.Zero;
             }
 
@@ -113,6 +133,7 @@ namespace LibSMB2Sharp
                 _bufferPtr = IntPtr.Zero;
             }
 
+            this.FileEntry.RefreshDetails();
             this.FileEntry.UnlockFile();
         }
     }

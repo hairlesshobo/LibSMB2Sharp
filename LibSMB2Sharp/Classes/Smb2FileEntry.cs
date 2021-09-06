@@ -8,13 +8,36 @@ namespace LibSMB2Sharp
     {
         private bool _locked = false;
         private Smb2FileReader reader = null;
+        private Smb2FileWriter writer = null;
 
         // TODO: without this, we cannot json serialize.. remove later
         public Smb2FileEntry() { }
 
-        public Smb2FileEntry (Smb2Share share, ref smb2dirent dirEnt, string containingDir = null, Smb2DirectoryEntry parentEntry = null)
-            : base (share, ref dirEnt, containingDir, parentEntry)
-        { 
+        
+        /// <summary>
+        ///     Create a new file entry where one does not already exist. This method will
+        ///     create an empty file with the provided named
+        /// </summary>
+        /// <param name="share"></param>
+        /// <param name="dirEntry"></param>
+        /// <param name="name"></param>
+        internal Smb2FileEntry(Smb2Share share, Smb2DirectoryEntry dirEntry, string name)
+            : base()
+        {
+            _share = share ?? throw new ArgumentNullException(nameof(share));
+            this._parentDirEntry = dirEntry;
+            this.Name = name;
+
+            string newFilePath = this.RelativePath;
+
+            this.Share.CreateOrTruncateFile(newFilePath);
+
+            this.RefreshDetails();
+        }
+
+        internal Smb2FileEntry(Smb2Share share, ref smb2dirent dirEnt, string containingDir = null, Smb2DirectoryEntry parentEntry = null)
+            : base(share, ref dirEnt, containingDir, parentEntry)
+        {
         }
 
         public void Dispose()
@@ -27,6 +50,13 @@ namespace LibSMB2Sharp
             return reader;
         }
 
+        public Smb2FileWriter OpenWriter()
+        {
+            writer = new Smb2FileWriter(this.Context, this);
+
+            return writer;
+        }
+
         public void Move(string newPath)
         {
             if (_removed)
@@ -34,7 +64,7 @@ namespace LibSMB2Sharp
 
             if (_locked)
                 throw new LibSmb2FileLockedException(this.RelativePath);
-                
+
             base.Move(newPath, true);
         }
 

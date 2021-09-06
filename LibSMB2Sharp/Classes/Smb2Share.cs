@@ -160,14 +160,40 @@ namespace LibSMB2Sharp
         //     return dirEntry;
         // }
 
-        public Smb2FileEntry GetFile(string path)
+        public Smb2FileEntry CreateFile(string path)
         {
-            Smb2Entry entry = GetEntry(path);
+            path = Helpers.CleanFilePath(path);
+
+            Smb2Entry entry = GetEntry(path, false);
 
             Smb2FileEntry fileEntry = entry as Smb2FileEntry;
 
-            if (fileEntry == null)
+            if (entry != null && fileEntry == null)
                 throw new LibSmb2NotAFileException(path);
+
+            if (fileEntry != null)
+                fileEntry.Remove();
+
+            string directory = Helpers.GetDirectoryPath(path);
+            string name = path.Substring(directory.Length).TrimStart('/');
+            Smb2DirectoryEntry dirEntry = this.GetDirectory(directory);
+            fileEntry = new Smb2FileEntry(this.Share, dirEntry, name);
+
+            return fileEntry;
+        }
+
+        public Smb2FileEntry GetFile(string path, bool createNew = false)
+        {
+            Smb2Entry entry = GetEntry(path, !createNew);
+
+            Smb2FileEntry fileEntry = entry as Smb2FileEntry;
+
+            // an entry exists, but it is not a file.. can't exactly use that
+            if (entry != null && fileEntry == null)
+                throw new LibSmb2NotAFileException(path);
+
+            if (fileEntry == null && createNew)
+                fileEntry = this.CreateFile(path);
 
             return fileEntry;
         }
@@ -205,6 +231,15 @@ namespace LibSMB2Sharp
 
         //     return Helpers.GenerateEntry(this.Context.Pointer, ref dirEnt, this, containingDir: dirName);
         // }
+
+        internal void CreateOrTruncateFile(string path)
+        {
+            string filePath = Helpers.CleanFilePathForNative(path);
+
+            IntPtr fhPtr = Methods.smb2_open(this.Context.Pointer, filePath, Const.O_WRONLY | Const.O_CREAT);
+            Methods.smb2_ftruncate(this.Context.Pointer, fhPtr, 0);
+            Methods.smb2_close(this.Context.Pointer, fhPtr);
+        }
 
         internal smb2dirent? GetDirEnt(string path, bool throwOnMissing = true)
         {

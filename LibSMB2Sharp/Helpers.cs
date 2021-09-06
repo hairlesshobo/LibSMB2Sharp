@@ -94,6 +94,16 @@ namespace LibSMB2Sharp
                 throw new LibSmb2InvalidEntryNameException(name);
         }
 
+        internal static string GetDirectoryPath(string fullPath)
+        {
+            fullPath = CleanFilePath(fullPath);
+
+            if (fullPath.LastIndexOf('/') == 0)
+                return "/";
+
+            return fullPath.Substring(0, fullPath.LastIndexOf('/'));
+        }
+
 
         internal static smb2_stat_64? Stat(Smb2Context context, string path)
         {

@@ -49,12 +49,16 @@ namespace LibSMB2Sharp
         {  }
 
         protected Smb2Entry(Smb2Share share, ref smb2dirent dirEnt, string containingDir = null, Smb2DirectoryEntry parentDir = null)
+            : this(share, containingDir, parentDir)
+        {
+            this.SetDetailsFromDirEnt(ref dirEnt);
+        }
+
+        protected Smb2Entry(Smb2Share share, string containingDir = null, Smb2DirectoryEntry parentDir = null)
         {
             _share = share ?? throw new ArgumentNullException(nameof(share));
             this._parentDirEntry = parentDir;
             this._containingDir = containingDir;
-
-            this.SetDetailsFromDirEnt(ref dirEnt);
         }
 
         protected void SetDetailsFromDirEnt(ref smb2dirent dirEnt)
@@ -83,6 +87,13 @@ namespace LibSMB2Sharp
             this._parentDirEntry = parentDirEntry;
 
             return this._parentDirEntry;
+        }
+
+        public void RefreshDetails()
+        {
+            smb2dirent dirEnt = this.Share.GetDirEnt(this.RelativePath, true) ?? throw new Exception();
+
+            this.SetDetailsFromDirEnt(ref dirEnt);
         }
 
         protected void Move(string newPath, bool movingFile, bool isRename = false)

@@ -492,7 +492,12 @@ namespace LibSMB2Sharp.Native
         /*
          * Sync fsync()
          */
-        [DllImport("libsmb2", SetLastError = true)]
+        //! No idea why, but dotnet cannot find this entry point.. even
+        //! though it was confirmed to exit with `libsmb2.so`.. and it has
+        //! no problem finding all the other entry points we need. I'm sure one
+        //! day i will be forced to figure out why... until then, we're gonna try 
+        //! to do without
+        [DllImport("libsmb2", EntryPoint = "smb2_fsync", SetLastError = true)]
         internal static extern int smb2_fsync(IntPtr smb2, IntPtr fh);
 
 
