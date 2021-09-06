@@ -86,6 +86,14 @@ namespace LibSMB2Sharp
         internal static string CleanFilePath(string path)
             => $"/{path.Trim().Replace('\\', '/').Replace("//", "/").Trim('/').TrimStart('.')}";
 
+        internal static void SanitizeEntryName(string name)
+        {
+            // TODO: impove name sanitization
+            
+            if (name.IndexOf('/') >= 0 || name.IndexOf('\\') >= 0)
+                throw new LibSmb2InvalidEntryNameException(name);
+        }
+
 
         internal static smb2_stat_64? Stat(Smb2Context context, string path)
         {

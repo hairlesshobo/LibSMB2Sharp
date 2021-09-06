@@ -68,10 +68,7 @@ namespace LibSMB2Sharp
             if (_removed)
                 throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
 
-            // TODO: impove name sanitization
-
-            if (name.IndexOf('/') >= 0 || name.IndexOf('\\') >= 0)
-                throw new LibSmb2InvalidDirectoryNameException(name);
+            Helpers.SanitizeEntryName(name);
 
             string dirNameRelative = Helpers.CleanFilePath($"{this.RelativePath}/{name}");
 
@@ -100,10 +97,7 @@ namespace LibSMB2Sharp
         //     if (_removed)
         //         throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
 
-        //     // TODO: impove name sanitization
-
-        //     if (name.IndexOf('/') >= 0 || name.IndexOf('\\') >= 0)
-        //         throw new LibSmb2InvalidDirectoryNameException(name);
+        //     Helpers.SanitizeEntryName(name);
 
         //     string dirNameRelative = $"{this.RelativePath}/{name}";
 

@@ -85,7 +85,7 @@ namespace LibSMB2Sharp
             return this._parentDirEntry;
         }
 
-        protected void Move(string newPath, bool movingFile)
+        protected void Move(string newPath, bool movingFile, bool isRename = false)
         {
             newPath = Helpers.CleanFilePath(newPath).TrimEnd('/');
 
@@ -117,11 +117,23 @@ namespace LibSMB2Sharp
             if (result < 0)
                 throw new LibSmb2NativeMethodException(this.Context, result);
 
-            smb2dirent newDirEnt = Share.GetDirEnt(newPath, true) ?? throw new Exception();
+            if (!isRename)
+            {
+                smb2dirent newDirEnt = Share.GetDirEnt(newPath, true) ?? throw new Exception();
 
-            this._parentDirEntry = newParentDirEntry;
-            this._containingDir = newParentDirPath;
-            this.SetDetailsFromDirEnt(ref newDirEnt);
+                this._parentDirEntry = newParentDirEntry;
+                this._containingDir = newParentDirPath;
+                this.SetDetailsFromDirEnt(ref newDirEnt);
+            }
+        }
+
+        public void Rename(string newName)
+        {
+            Helpers.SanitizeEntryName(newName);
+
+            string newPath = Helpers.CleanFilePath($"{this.Directory}/{newName}");
+
+            this.Move(newPath, false, true);
         }
 
         public override string ToString()
