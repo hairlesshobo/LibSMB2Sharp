@@ -18,6 +18,16 @@ your body if you so much as even consider using this library.
 Below I will list each API call that is available in libsmb2 and categorizes them based on
 their current implementation status in this wrapper library.
 
+### TODO
+--------------------------------------------------
+* Add ability to open a file for appending
+* Determine why DllImport cannot find entry point for smb2_fsync
+* Add the following methods to Smb2DirectoryEntry:
+    * GetEntry()
+    * GetFile()
+    * GetDirectory()
+    * CreateFile()
+
 
 ### Fully ported and functionality available:
 --------------------------------------------------
@@ -55,11 +65,6 @@ their current implementation status in this wrapper library.
 * smb2_statvfs
 * smb2_unlink
 * smb2_write
-
-### TODO
---------------------------------------------------
-* Add ability to open a file for appending
-* Determine why DllImport cannot find entry point for smb2_fsync
 
 
 
