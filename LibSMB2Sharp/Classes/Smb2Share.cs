@@ -35,10 +35,9 @@ namespace LibSMB2Sharp
             this._isRootShare = true;
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
-            smb2dirent? dirEntN = this.GetDirEnt("/");
-            smb2dirent dirEnt = dirEntN.Value;
+            smb2dirent dirEnt = this.GetDirEnt("/") ?? throw new LibSmb2DirectoryNotFoundException("/");
 
-            this.SetDirDetails(ref dirEnt);
+            this.SetDetailsFromDirEnt(ref dirEnt);
             this.SetVfsDetails();
         }
 
@@ -53,7 +52,7 @@ namespace LibSMB2Sharp
                 int result = Methods.smb2_statvfs(this.Context.Pointer, "", ptr);
 
                 if (result < Const.EOK)
-                    throw new LibSmb2NativeMethodException(this.Context.Pointer, result);
+                    throw new LibSmb2NativeMethodException(this.Context, result);
 
                 smb2_statvfs statvfs = Marshal.PtrToStructure<smb2_statvfs>(ptr);
 
@@ -106,13 +105,16 @@ namespace LibSMB2Sharp
                 throw new LibSmb2FileNotFoundException("");
 
             string remainingPath = rawPath.Substring(testPath.Length);
-            
-            string[] remainingParts = rawPath.Split('/');
 
-            foreach (string part in remainingParts)
+            if (!String.IsNullOrWhiteSpace(remainingPath))
             {
-                Smb2DirectoryEntry newDirEntry = dirEntry.CreateDirectory(part);
-                dirEntry = newDirEntry;
+                string[] remainingParts = remainingPath.Split('/');
+
+                foreach (string part in remainingParts)
+                {
+                    Smb2DirectoryEntry newDirEntry = dirEntry.CreateDirectory(part);
+                    dirEntry = newDirEntry;
+                }
             }
 
             return dirEntry;
@@ -120,10 +122,10 @@ namespace LibSMB2Sharp
 
         public Smb2DirectoryEntry GetDirectory(string path, bool throwOnMissing = true)
         {
-            path = path.Trim();
-
             if (String.IsNullOrWhiteSpace(path))
-                return this;
+                throw new ArgumentNullException(nameof(path));
+
+            path = Helpers.CleanFilePath(path);
 
             Smb2Entry entry = GetEntry(path, throwOnMissing);
 
@@ -181,8 +183,8 @@ namespace LibSMB2Sharp
 
             string dirName = Path.GetDirectoryName(path);
 
-            if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
-                dirName = Path.GetDirectoryName(dirName);
+            // if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
+            //     dirName = Path.GetDirectoryName(dirName);
 
             return Helpers.GenerateEntry(this, ref dirEnt, containingDir: dirName);
         }
@@ -204,7 +206,7 @@ namespace LibSMB2Sharp
         //     return Helpers.GenerateEntry(this.Context.Pointer, ref dirEnt, this, containingDir: dirName);
         // }
 
-        private smb2dirent? GetDirEnt(string path, bool throwOnMissing = true)
+        internal smb2dirent? GetDirEnt(string path, bool throwOnMissing = true)
         {
             path = Helpers.CleanFilePath(path);
 

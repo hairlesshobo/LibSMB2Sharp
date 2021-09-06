@@ -84,7 +84,7 @@ namespace LibSMB2Sharp
             => CleanFilePath(path).TrimStart('/');
 
         internal static string CleanFilePath(string path)
-            => path.Replace('\\', '/').Replace("//", "/").TrimStart('.');
+            => $"/{path.Trim().Replace('\\', '/').Replace("//", "/").Trim('/').TrimStart('.')}";
 
 
         internal static smb2_stat_64? Stat(Smb2Context context, string path)
@@ -101,7 +101,7 @@ namespace LibSMB2Sharp
                     return null;
 
                 if (ptr == IntPtr.Zero || result < Const.EOK)
-                    throw new LibSmb2NativeMethodException(context.Pointer, result);
+                    throw new LibSmb2NativeMethodException(context, result);
 
                 return Marshal.PtrToStructure<smb2_stat_64>(ptr);
             }

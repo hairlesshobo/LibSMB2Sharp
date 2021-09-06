@@ -12,7 +12,11 @@ namespace LibSMB2Sharp
 
     public abstract class Smb2Entry
     {
+        private smb2dirent _dirEnt;
+
         protected Smb2DirectoryEntry _parentDirEntry = null;
+        protected string _containingDir = null;
+
         protected Smb2Share _share = null;
         protected bool _isRootShare = false;
 
@@ -38,31 +42,30 @@ namespace LibSMB2Sharp
         public Smb2EntryType Type { get; private protected set; }
         public Smb2Share Share => _share;
         public virtual Smb2Context Context => this.Share.Context;
-        private smb2dirent _dirEnt;
-        private string _containingDir = null;
 
         protected Smb2Entry()
         {  }
 
         protected Smb2Entry(Smb2Share share, ref smb2dirent dirEnt, string containingDir = null, Smb2DirectoryEntry parentDir = null)
         {
-            _dirEnt = dirEnt;
             _share = share ?? throw new ArgumentNullException(nameof(share));
             this._parentDirEntry = parentDir;
             this._containingDir = containingDir;
 
-            this.SetDirDetails(ref dirEnt);
+            this.SetDetailsFromDirEnt(ref dirEnt);
         }
 
-        protected void SetDirDetails(ref smb2dirent dirEnt)
+        protected void SetDetailsFromDirEnt(ref smb2dirent dirEnt)
         {
-            this.Name = dirEnt.name;
-            this.Size = dirEnt.st.smb2_size;
-            this.AcccessDtm = DateTimeOffset.FromUnixTimeSeconds((long)dirEnt.st.smb2_atime);
-            this.ChangeDtm = DateTimeOffset.FromUnixTimeSeconds((long)dirEnt.st.smb2_ctime);
-            this.CreateDtm = DateTimeOffset.FromUnixTimeSeconds((long)dirEnt.st.smb2_btime);
-            this.ModifyDtm = DateTimeOffset.FromUnixTimeSeconds((long)dirEnt.st.smb2_mtime);
-            this.Type = (Smb2EntryType)dirEnt.st.smb2_type;
+            _dirEnt = dirEnt;
+
+            this.Name = _dirEnt.name;
+            this.Size = _dirEnt.st.smb2_size;
+            this.AcccessDtm = DateTimeOffset.FromUnixTimeSeconds((long)_dirEnt.st.smb2_atime);
+            this.ChangeDtm = DateTimeOffset.FromUnixTimeSeconds((long)_dirEnt.st.smb2_ctime);
+            this.CreateDtm = DateTimeOffset.FromUnixTimeSeconds((long)_dirEnt.st.smb2_btime);
+            this.ModifyDtm = DateTimeOffset.FromUnixTimeSeconds((long)_dirEnt.st.smb2_mtime);
+            this.Type = (Smb2EntryType)_dirEnt.st.smb2_type;
         }
 
         public Smb2DirectoryEntry GetParentDirectory()
@@ -79,5 +82,8 @@ namespace LibSMB2Sharp
 
             return this._parentDirEntry;
         }
+
+        public override string ToString()
+            => (this.Type == Smb2EntryType.File ? "File" : "Directory") + " : " + this.RelativePath;
     }
 }

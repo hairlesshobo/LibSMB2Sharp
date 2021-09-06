@@ -1,13 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using LibSMB2Sharp.Native;
-using LibSMB2Sharp.Exceptions;
 using LibSMB2Sharp;
-using System.Threading.Tasks;
 
 namespace TestCLI
 {
@@ -31,13 +27,10 @@ namespace TestCLI
             {
                 Smb2Share share = smb2.OpenShare();
 
-                foreach (Smb2Entry entry in share.GetEntries())
-                {
-                    Console.WriteLine(entry.RelativePath);
-                }
-
                 // share.CreateDirectoryTree("/test/another/test/for/steve");
-                // Smb2DirectoryEntry dirEntry = share.GetDirectory("/test/");
+                Smb2DirectoryEntry dirEntry = share.GetDirectory("/meow/");
+
+                dirEntry.Move("/this/is/a/test/meow3");
 
                 // dirEntry.Remove();
 
@@ -46,12 +39,13 @@ namespace TestCLI
                 
                 
 
-                // Console.WriteLine(JsonSerializer.Serialize(entry, new JsonSerializerOptions()
-                // {
-                //     WriteIndented = true,
-                //     IgnoreNullValues = false,
-                //     IncludeFields = true
-                // }));
+                Console.WriteLine(JsonSerializer.Serialize(dirEntry, new JsonSerializerOptions()
+                {
+                    WriteIndented = true,
+                    IgnoreNullValues = false,
+                    IncludeFields = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                }));
 
                 // Smb2FileEntry entry = smb2.OpenFile("/screenrc");
 

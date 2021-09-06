@@ -72,7 +72,7 @@ namespace LibSMB2Sharp
             int result = Methods.smb2_connect_share(this.Pointer, this.Server, this.Share, this.User);
 
             if (result < Const.EOK)
-                throw new LibSmb2ConnectionException(this.Pointer, result);
+                throw new LibSmb2ConnectionException(this, result);
 
             _share = new Smb2Share(this);
 

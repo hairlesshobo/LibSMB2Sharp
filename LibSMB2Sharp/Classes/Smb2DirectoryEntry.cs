@@ -59,7 +59,7 @@ namespace LibSMB2Sharp
             int result = Methods.smb2_rmdir(this.Context.Pointer, Helpers.CleanFilePathForNative(this.RelativePath));
 
             if (result < Const.EOK)
-                throw new LibSmb2NativeMethodException(this.Context.Pointer, result);
+                throw new LibSmb2NativeMethodException(this.Context, result);
 
             _removed = true;
         }
@@ -74,21 +74,51 @@ namespace LibSMB2Sharp
             if (name.IndexOf('/') >= 0 || name.IndexOf('\\') >= 0)
                 throw new LibSmb2InvalidDirectoryNameException(name);
 
-            string dirNameRelative = $"{this.RelativePath}/{name}";
+            string dirNameRelative = Helpers.CleanFilePath($"{this.RelativePath}/{name}");
 
             int result = Methods.smb2_mkdir(this.Context.Pointer, Helpers.CleanFilePathForNative(dirNameRelative));
 
             if (result < Const.EOK)
-                throw new LibSmb2NativeMethodException(this.Context.Pointer, result);
+                throw new LibSmb2NativeMethodException(this.Context, result);
 
             return _share.GetDirectory(dirNameRelative);
         }
 
-        public Smb2DirectoryEntry Move(string newPath)
+        public void Move(string newPath)
         {
+            newPath = Helpers.CleanFilePath(newPath).TrimEnd('/');
+
+            if (_removed)
+                throw new LibSmb2DirectoryNotFoundException(this.RelativePath);
+
             smb2_stat_64? statResult = Helpers.Stat(this.Context, newPath);
 
-            return null;
+            if (statResult != null)
+                throw new LibSmb2OperationNotAllowedException($"Cannot move directory, destination path already exists: {newPath}");
+
+            this.Close();
+
+            string newParentDirPath = "/";
+
+            if (newPath.LastIndexOf('/') > 0)
+                newParentDirPath = newPath.Substring(0, newPath.LastIndexOf('/'));
+
+            Smb2DirectoryEntry newParentDirEntry = this.Share.CreateDirectoryTree(newParentDirPath);
+
+            int result = Methods.smb2_rename(
+                this.Share.Context.Pointer, 
+                Helpers.CleanFilePathForNative(this.RelativePath), 
+                newPath
+            );
+            
+            if (result < 0)
+                throw new LibSmb2NativeMethodException(this.Context, result);
+
+            smb2dirent newDirEnt = Share.GetDirEnt(newPath, true) ?? throw new Exception();
+
+            this._parentDirEntry = newParentDirEntry;
+            this._containingDir = newParentDirPath;
+            this.SetDetailsFromDirEnt(ref newDirEnt);
         }
 
         //! DOES NOT WORK

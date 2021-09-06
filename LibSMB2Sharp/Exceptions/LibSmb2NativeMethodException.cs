@@ -20,6 +20,15 @@ namespace LibSMB2Sharp.Exceptions
             this.ErrorCode = result;
         }
 
+        public LibSmb2NativeMethodException(Smb2Context context, int result) 
+            : base(GetErrorMessage(context, result))
+        { 
+            this.ErrorCode = result;
+        }
+
+        private static string GetErrorMessage(Smb2Context context, int result)
+            => GetErrorMessage(context.Pointer, result);
+
         private static string GetErrorMessage(IntPtr smb2, int result)
         {
             StringBuilder builder = new StringBuilder();

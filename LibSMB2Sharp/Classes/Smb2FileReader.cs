@@ -73,7 +73,7 @@ namespace LibSMB2Sharp
             _position += bytesRead;
 
             if (bytesRead < 0)
-                throw new LibSmb2NativeMethodException(this.Context.Pointer, bytesRead);
+                throw new LibSmb2NativeMethodException(this.Context, bytesRead);
 
             Marshal.Copy(_bufferPtr, buffer, offset, count);
 
