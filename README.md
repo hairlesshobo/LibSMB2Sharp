@@ -13,19 +13,16 @@ your body if you so much as even consider using this library.
 
 ... You have been warned!
 
-
-## API Implementation Status
-Below I will list each API call that is available in libsmb2 and categorizes them based on
-their current implementation status in this wrapper library.
-
-### TODO
---------------------------------------------------
+## TODO
 * Add ability to open a file for appending
 * Determine why DllImport cannot find entry point for smb2_fsync
 
+## API Implementation Status
 
-### Fully ported and functionality available:
---------------------------------------------------
+Below I will list each API call that is available in libsmb2 and categorizes them based on
+their current implementation status in this wrapper library.
+
+#### Fully ported and functionality available:
 * smb2_close
 * smb2_closedir
 * smb2_connect_share
@@ -62,9 +59,7 @@ their current implementation status in this wrapper library.
 * smb2_write
 
 
-
-### In PInvoke.cs but NOT ported yet (Future scope):
---------------------------------------------------
+#### In PInvoke.cs but NOT ported yet (Future scope):
 * smb2_close_async
 * smb2_cmd_close_async
 * smb2_cmd_create_async
@@ -106,8 +101,8 @@ their current implementation status in this wrapper library.
 * smb2_fd_event_callbacks
 * smb2_get_fds
 
-### Not Planned
---------------------------------------------------
+
+#### Not Planned
 * smb2_fstat
 * smb2_lseek
 * smb2_pread
@@ -119,8 +114,7 @@ their current implementation status in this wrapper library.
 * smb2_truncate
 
 
-### Most likely not in scope:
---------------------------------------------------
+#### Most likely not in scope:
 * smb2_fh_from_file_id
 * smb2_free_data
 * smb2_get_file_id
@@ -129,8 +123,8 @@ their current implementation status in this wrapper library.
 * smb2_set_authentication
 * smb2_set_opaque
 
-### Not in scope:
---------------------------------------------------
+
+#### Not in scope:
 * smb2_add_compound_pdu
 * smb2_free_pdu
 * smb2_queue_pdu
