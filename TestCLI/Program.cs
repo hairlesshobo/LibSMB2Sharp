@@ -30,16 +30,19 @@ namespace TestCLI
             {
                 Smb2Share share = smb2.OpenShare();
 
-                Smb2FileEntry fileEntry = share.GetFile("/meow/doc2.txt", true);
+                Smb2DirectoryEntry dirEntry = share.GetDirectory("/meow/bloop");
+                // Smb2DirectoryEntry dirEntry2 = dirEntry.GetDirectory("bloop");
+                // Smb2FileEntry fileEntry = dirEntry2.GetFile("doc2.txt");
+                // dirEntry2.CreateFile("woof.bloop");
 
-                using (Smb2FileWriter writer = fileEntry.OpenWriter())
-                {
-                    // writer.WriteLine("this is a test of the emergency broadcast system");
-                    writer.WriteLine("come on, does this actually work??");
-                }
+                // using (Smb2FileWriter writer = fileEntry.OpenWriter())
+                // {
+                //     // writer.WriteLine("this is a test of the emergency broadcast system");
+                //     writer.WriteLine("come on, does this actually work??");
+                // }
                 
 
-                Console.WriteLine(JsonSerializer.Serialize(fileEntry, new JsonSerializerOptions()
+                Console.WriteLine(JsonSerializer.Serialize(dirEntry, new JsonSerializerOptions()
                 {
                     WriteIndented = true,
                     IgnoreNullValues = false,

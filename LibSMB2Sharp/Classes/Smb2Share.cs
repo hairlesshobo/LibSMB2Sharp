@@ -38,10 +38,10 @@ namespace LibSMB2Sharp
             smb2dirent dirEnt = this.GetDirEnt("/") ?? throw new LibSmb2DirectoryNotFoundException("/");
 
             this.SetDetailsFromDirEnt(ref dirEnt);
-            this.SetVfsDetails();
+            this.RefreshVfsDetails();
         }
 
-        private void SetVfsDetails()
+        public void RefreshVfsDetails()
         {
             IntPtr ptr = IntPtr.Zero;
 
@@ -120,14 +120,20 @@ namespace LibSMB2Sharp
             return dirEntry;
         }
 
-        public Smb2DirectoryEntry GetDirectory(string path, bool throwOnMissing = true)
+        public Smb2DirectoryEntry GetDirectory()
+            => this.GetDirectory(null);
+
+        public new Smb2DirectoryEntry GetDirectory(string path, bool throwOnMissing = true)
         {
             if (String.IsNullOrWhiteSpace(path))
-                throw new ArgumentNullException(nameof(path));
+                return this;
 
             path = Helpers.CleanFilePath(path);
 
-            Smb2Entry entry = GetEntry(path, throwOnMissing);
+            if (path == "/")
+                return this;
+
+            Smb2Entry entry = this.GetEntry(path, throwOnMissing);
 
             if (entry == null)
                 return null;
@@ -140,28 +146,11 @@ namespace LibSMB2Sharp
             return dirEntry;
         }
 
-        // private async Task<Smb2DirectoryEntry> GetDirectoryAsync(string path, bool throwOnMissing = true)
-        // {
-        //     path = path.Trim();
-
-        //     if (String.IsNullOrWhiteSpace(path))
-        //         return this;
-
-        //     Smb2Entry entry = await GetEntryAsync(path, throwOnMissing);
-
-        //     if (entry == null)
-        //         return null;
-
-        //     Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
-
-        //     if (dirEntry == null)
-        //         throw new LibSmb2NotADirectoryException(path);
-
-        //     return dirEntry;
-        // }
-
-        public Smb2FileEntry CreateFile(string path)
+        public new Smb2FileEntry CreateFile(string path)
         {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
+
             path = Helpers.CleanFilePath(path);
 
             Smb2Entry entry = GetEntry(path, false);
@@ -182,8 +171,11 @@ namespace LibSMB2Sharp
             return fileEntry;
         }
 
-        public Smb2FileEntry GetFile(string path, bool createNew = false)
+        public new Smb2FileEntry GetFile(string path, bool createNew = false)
         {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
+
             Smb2Entry entry = GetEntry(path, !createNew);
 
             Smb2FileEntry fileEntry = entry as Smb2FileEntry;
@@ -198,8 +190,13 @@ namespace LibSMB2Sharp
             return fileEntry;
         }
         
-        public Smb2Entry GetEntry(string path, bool throwOnMissing = true)
+        public new Smb2Entry GetEntry(string path, bool throwOnMissing = true)
         {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
+
+            path = Helpers.CleanFilePath(path);
+
             smb2dirent? dirEntN = this.GetDirEnt(path, throwOnMissing);
 
             if (dirEntN == null)
@@ -209,31 +206,14 @@ namespace LibSMB2Sharp
 
             string dirName = Path.GetDirectoryName(path);
 
-            // if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
-            //     dirName = Path.GetDirectoryName(dirName);
-
             return Helpers.GenerateEntry(this, ref dirEnt, containingDir: dirName);
         }
 
-        // public async Task<Smb2Entry> GetEntryAsync(string path, bool throwOnMissing = true)
-        // {
-        //     smb2dirent? dirEntN = await this.GetDirEntAsync(path, throwOnMissing);
-
-        //     if (dirEntN == null)
-        //         return null;
-
-        //     smb2dirent dirEnt = dirEntN.Value;
-
-        //     string dirName = Path.GetDirectoryName(path);
-
-        //     if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
-        //         dirName = Path.GetDirectoryName(dirName);
-
-        //     return Helpers.GenerateEntry(this.Context.Pointer, ref dirEnt, this, containingDir: dirName);
-        // }
-
-        internal void CreateOrTruncateFile(string path)
+        internal new void CreateOrTruncateFile(string path)
         {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException($"'{nameof(path)}' cannot be null or whitespace.", nameof(path));
+
             string filePath = Helpers.CleanFilePathForNative(path);
 
             IntPtr fhPtr = Methods.smb2_open(this.Context.Pointer, filePath, Const.O_WRONLY | Const.O_CREAT);
@@ -241,7 +221,7 @@ namespace LibSMB2Sharp
             Methods.smb2_close(this.Context.Pointer, fhPtr);
         }
 
-        internal smb2dirent? GetDirEnt(string path, bool throwOnMissing = true)
+        internal new smb2dirent? GetDirEnt(string path, bool throwOnMissing = true)
         {
             path = Helpers.CleanFilePath(path);
 
@@ -265,6 +245,38 @@ namespace LibSMB2Sharp
 
             return dirEnt;
         }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            foreach (Smb2DirectoryEntry dirEntry in _openDirEntries)
+                dirEntry.Dispose();
+
+            Helpers.CloseDir(this.Context, ref _rootDirPtr);
+        }
+
+        internal void RegisterOpenDirectory(Smb2DirectoryEntry entry)
+            => _openDirEntries.Add(entry);
+
+
+        // public async Task<Smb2Entry> GetEntryAsync(string path, bool throwOnMissing = true)
+        // {
+        //     smb2dirent? dirEntN = await this.GetDirEntAsync(path, throwOnMissing);
+
+        //     if (dirEntN == null)
+        //         return null;
+
+        //     smb2dirent dirEnt = dirEntN.Value;
+
+        //     string dirName = Path.GetDirectoryName(path);
+
+        //     if (dirEnt.st.smb2_type == Const.SMB2_TYPE_DIRECTORY)
+        //         dirName = Path.GetDirectoryName(dirName);
+
+        //     return Helpers.GenerateEntry(this.Context.Pointer, ref dirEnt, this, containingDir: dirName);
+        // }
+
 
         // private async Task<Nullable<smb2dirent>> GetDirEntAsync(string path, bool throwOnMissing = true)
         // {
@@ -292,17 +304,24 @@ namespace LibSMB2Sharp
         // }
 
 
-        public override void Dispose()
-        {
-            base.Dispose();
+        // private async Task<Smb2DirectoryEntry> GetDirectoryAsync(string path, bool throwOnMissing = true)
+        // {
+        //     path = path.Trim();
 
-            foreach (Smb2DirectoryEntry dirEntry in _openDirEntries)
-                dirEntry.Dispose();
+        //     if (String.IsNullOrWhiteSpace(path))
+        //         return this;
 
-            Helpers.CloseDir(this.Context, ref _rootDirPtr);
-        }
+        //     Smb2Entry entry = await GetEntryAsync(path, throwOnMissing);
 
-        internal void RegisterOpenDirectory(Smb2DirectoryEntry entry)
-            => _openDirEntries.Add(entry);
+        //     if (entry == null)
+        //         return null;
+
+        //     Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
+
+        //     if (dirEntry == null)
+        //         throw new LibSmb2NotADirectoryException(path);
+
+        //     return dirEntry;
+        // }
     }
 }

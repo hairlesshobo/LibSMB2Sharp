@@ -30,8 +30,6 @@ namespace LibSMB2Sharp
 
             string newFilePath = this.RelativePath;
 
-            this.Share.CreateOrTruncateFile(newFilePath);
-
             this.RefreshDetails();
         }
 

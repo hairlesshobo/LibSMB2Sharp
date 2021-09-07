@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using LibSMB2Sharp.Exceptions;
@@ -41,6 +42,79 @@ namespace LibSMB2Sharp
             }
 
             Close();
+        }
+
+        public virtual Smb2FileEntry CreateFile(string name)
+        {
+            if (name is null)
+                throw new ArgumentNullException(nameof(name));
+
+            Helpers.SanitizeEntryName(name);
+
+            Smb2Entry entry = this.GetEntry(name, false);
+
+            Smb2FileEntry fileEntry = entry as Smb2FileEntry;
+
+            if (entry != null && fileEntry == null)
+                throw new LibSmb2NotAFileException(Path.Combine(this.RelativePath, name));
+
+            this.CreateOrTruncateFile(name);
+
+            fileEntry = new Smb2FileEntry(this.Share, this, name);
+
+            return fileEntry;
+        }
+
+        public virtual Smb2FileEntry GetFile(string name, bool createNew = false)
+        {
+            Helpers.SanitizeEntryName(name);
+
+            Smb2Entry entry = this.GetEntry(name, !createNew);
+
+            Smb2FileEntry fileEntry = entry as Smb2FileEntry;
+
+            // an entry exists, but it is not a file.. can't exactly use that
+            if (entry != null && fileEntry == null)
+                throw new LibSmb2NotAFileException(Path.Combine(this.RelativePath, name));
+
+            if (fileEntry == null && createNew)
+                fileEntry = this.CreateFile(name);
+
+            return fileEntry;
+        }
+
+        public virtual Smb2DirectoryEntry GetDirectory(string name, bool throwOnMissing = true)
+        {
+            if (String.IsNullOrWhiteSpace(name))
+                return this;
+
+            Helpers.SanitizeEntryName(name);
+
+            Smb2Entry entry = this.GetEntry(name, throwOnMissing);
+
+            if (entry == null)
+                return null;
+
+            Smb2DirectoryEntry dirEntry = entry as Smb2DirectoryEntry;
+
+            if (dirEntry == null)
+                throw new LibSmb2NotADirectoryException(Path.Combine(this.RelativePath, name));
+
+            return dirEntry;
+        }
+
+        public virtual Smb2Entry GetEntry(string name, bool throwOnMissing = true)
+        {
+            Helpers.SanitizeEntryName(name);
+            
+            smb2dirent? dirEntN = this.GetDirEnt(name, throwOnMissing);
+
+            if (dirEntN == null)
+                return null;
+
+            smb2dirent dirEnt = dirEntN.Value;
+
+            return Helpers.GenerateEntry(this.Share, ref dirEnt, parent: this);
         }
 
         public void Remove()
@@ -90,6 +164,53 @@ namespace LibSMB2Sharp
             base.Move(newPath, false);
         }
 
+        public virtual void Dispose()
+            => Close();
+
+        internal void CreateOrTruncateFile(string name)
+        {
+            Helpers.SanitizeEntryName(name);
+
+            string filePath = Helpers.CleanFilePathForNative(Path.Combine(this.RelativePath, name));
+
+            IntPtr fhPtr = Methods.smb2_open(this.Context.Pointer, filePath, Const.O_WRONLY | Const.O_CREAT);
+            Methods.smb2_ftruncate(this.Context.Pointer, fhPtr, 0);
+            Methods.smb2_close(this.Context.Pointer, fhPtr);
+        }
+
+        internal virtual smb2dirent? GetDirEnt(string name, bool throwOnMissing = true)
+        {
+            Helpers.SanitizeEntryName(name);
+
+            string path = Path.Combine(this.RelativePath, name);
+
+            smb2_stat_64? stat = Helpers.Stat(this.Context, path);
+
+            if (stat == null)
+            {
+                if (throwOnMissing)
+                    throw new LibSmb2FileNotFoundException(path);
+                else
+                    return null;
+            } 
+
+            path = path.TrimEnd('/');
+
+            smb2dirent dirEnt = new smb2dirent()
+            {
+                name = Path.GetFileName(path),
+                st = stat.Value
+            };
+
+            return dirEnt;
+        }
+
+        private void Open()
+            => Helpers.OpenDir(this.Context, ref _dirPtr, this.RelativePath);
+
+        private void Close()
+            => Helpers.CloseDir(this.Context, ref _dirPtr);
+
         //! DOES NOT WORK
         //! CAUSES ERROR "free(): double free detected in tcache 2" to be emitted when application closes
         // private Task<Smb2DirectoryEntry> CreateDirectoryAsync(string name)
@@ -115,15 +236,5 @@ namespace LibSMB2Sharp
 
         //     return tcs.Task;
         // }
-
-        public virtual void Dispose()
-            => Close();
-
-        private void Open()
-            => Helpers.OpenDir(this.Context, ref _dirPtr, this.RelativePath);
-
-        private void Close()
-            => Helpers.CloseDir(this.Context, ref _dirPtr);
-
     }
 }

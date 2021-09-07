@@ -22,11 +22,6 @@ their current implementation status in this wrapper library.
 --------------------------------------------------
 * Add ability to open a file for appending
 * Determine why DllImport cannot find entry point for smb2_fsync
-* Add the following methods to Smb2DirectoryEntry:
-    * GetEntry()
-    * GetFile()
-    * GetDirectory()
-    * CreateFile()
 
 
 ### Fully ported and functionality available:
