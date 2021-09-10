@@ -1,6 +1,26 @@
-using System;
+/**
+ *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
+ * 
+ *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
+ *
+ *  Parts of this code are borrowed from the libsmb2 project. Those parts are 
+ *  Copyright (C) 2016 by Ronnie Sahlberg <ronniesahlberg@gmail.com>
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation; either version 2.1 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program; if not, see <http://www.gnu.org/licenses/>.
+ */
+
 using System.Runtime.InteropServices;
-using System.Text.Json.Serialization;
 
 namespace LibSMB2Sharp.Native
 {
@@ -40,13 +60,13 @@ namespace LibSMB2Sharp.Native
     //     public uint tree_id;
     //     public ulong message_id;
     //     public ulong session_id;
-        
+
     //     public IntPtr session_key; //ptr to byte[]
     //     public byte session_key_size;
 
     //     public byte signing_required;
 
-        
+
     //     [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.SMB2_KEY_SIZE)]
     //     public byte[] signing_key;
 
@@ -66,14 +86,14 @@ namespace LibSMB2Sharp.Native
     //     //% match @ 6352
 
     //     public smb2_recv_state recv_state;
-        
+
     //     /* SPL for the (compound) command we are currently reading */
     //     public uint spl;
-        
+
     //     /* buffer to avoid having to malloc the header */
     //     [MarshalAs(UnmanagedType.ByValArray, SizeConst = Const.SMB2_HEADER_SIZE)]
     //     public byte[] header;
-        
+
     //     public smb2_header hdr;
     //     /* Offset into smb2->in where the payload for the current PDU starts */
     //     public ulong payload_offset;
@@ -121,7 +141,7 @@ namespace LibSMB2Sharp.Native
     // public struct smb2dir 
     // {
     //     public IntPtr next; // ptr
-    
+
     //     [JsonIgnore]
     //     public smb2_command_cb cb;
     //     public IntPtr cb_data; // void *cb_data;
@@ -130,7 +150,7 @@ namespace LibSMB2Sharp.Native
     //     public byte[] file_id; //smb2_file_id
 
     //     public IntPtr entries; // ptr to smb2_dirent_internal
-        
+
     //     public IntPtr current_entry; // struct smb2_dirent_internal *current_entry; // ptr
     //     public int index;
     // }
