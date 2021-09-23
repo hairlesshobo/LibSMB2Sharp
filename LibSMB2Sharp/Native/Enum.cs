@@ -1,4 +1,4 @@
-/**
+/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -20,7 +20,7 @@
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace LibSMB2Sharp.Native
+namespace FoxHollow.LibSMB2Sharp.Native
 {
     public enum smb2_sec 
     {

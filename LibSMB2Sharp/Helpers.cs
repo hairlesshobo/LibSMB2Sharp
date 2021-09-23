@@ -1,4 +1,4 @@
-/**
+/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -19,10 +19,10 @@
 
 using System;
 using System.Runtime.InteropServices;
-using LibSMB2Sharp.Exceptions;
-using LibSMB2Sharp.Native;
+using FoxHollow.LibSMB2Sharp.Exceptions;
+using FoxHollow.LibSMB2Sharp.Native;
 
-namespace LibSMB2Sharp
+namespace FoxHollow.LibSMB2Sharp
 {
     internal class Helpers
     {

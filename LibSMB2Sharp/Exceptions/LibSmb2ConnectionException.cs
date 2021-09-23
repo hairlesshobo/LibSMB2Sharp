@@ -1,4 +1,4 @@
-/**
+/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -17,7 +17,7 @@
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace LibSMB2Sharp.Exceptions
+namespace FoxHollow.LibSMB2Sharp.Exceptions
 {
     public class LibSmb2ConnectionException : LibSmb2NativeMethodException
     {

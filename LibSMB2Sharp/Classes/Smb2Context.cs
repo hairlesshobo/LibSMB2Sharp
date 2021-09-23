@@ -1,4 +1,4 @@
-/**
+/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -19,11 +19,15 @@
 
 using System;
 using System.Runtime.InteropServices;
-using LibSMB2Sharp.Exceptions;
-using LibSMB2Sharp.Native;
+using FoxHollow.LibSMB2Sharp.Exceptions;
+using FoxHollow.LibSMB2Sharp.Native;
 
-namespace LibSMB2Sharp
+namespace FoxHollow.LibSMB2Sharp
 {
+    /// <summary>
+    ///     This class represents a "context" or "connection" to a smb server. It is,
+    ///     therefore, the entrypoint for any interaction with a smb server. 
+    /// </summary>
     public class Smb2Context : IDisposable
     {
         private bool _started = false;
@@ -45,7 +49,14 @@ namespace LibSMB2Sharp
         // private Task _asyncRunnerTask = Task.CompletedTask; // reserved for future async
         // private CancellationTokenSource _cts = new CancellationTokenSource(); // reserved for future async
 
+        /// <summary>
+        ///     UNC path represented by this context
+        /// </summary>
         public string UncPath => $"smb://{this.Server}";
+
+        /// <summary>
+        ///     Connection string used to connect to this smb server
+        /// </summary>
         public string ConnectionString 
         { 
             get => _connectionString; 

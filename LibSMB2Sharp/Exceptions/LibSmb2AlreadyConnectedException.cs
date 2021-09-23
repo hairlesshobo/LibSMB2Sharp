@@ -1,4 +1,4 @@
-/**
+/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -19,10 +19,19 @@
 
 using System;
 
-namespace LibSMB2Sharp.Exceptions
+namespace FoxHollow.LibSMB2Sharp.Exceptions
 {
+    /// <summary>
+    ///     This exception is thrown if the user attempts to establish a connection
+    ///     with a smb server when the connection is already open
+    /// </summary>
     public class LibSmb2AlreadyConnectedException : Exception
     {
+        /// <summary>
+        ///     Default constructor that throws the following message:
+        /// 
+        ///     Unable to perform requested operation, the LibSmb2 context is already connected
+        /// </summary>
         public LibSmb2AlreadyConnectedException() : base("Unable to perform requested operation, the LibSmb2 context is already connected")
         { }
     }

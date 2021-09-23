@@ -1,4 +1,4 @@
-/**
+/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -22,7 +22,7 @@
 
 using System;
 
-namespace LibSMB2Sharp.Native
+namespace FoxHollow.LibSMB2Sharp.Native
 {
     public static class Const
     {

@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -25,7 +25,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using LibSMB2Sharp;
+using FoxHollow.LibSMB2Sharp;
 
 namespace TestCLI
 {

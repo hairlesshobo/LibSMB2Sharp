@@ -1,4 +1,4 @@
-/**
+/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -20,10 +20,10 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using LibSMB2Sharp.Exceptions;
-using LibSMB2Sharp.Native;
+using FoxHollow.LibSMB2Sharp.Exceptions;
+using FoxHollow.LibSMB2Sharp.Native;
 
-namespace LibSMB2Sharp
+namespace FoxHollow.LibSMB2Sharp
 {
     public class Smb2FileReader : Stream
     {
@@ -49,6 +49,12 @@ namespace LibSMB2Sharp
             set => throw new NotSupportedException();
         }
 
+        /// <summary>
+        ///     Create a new instance of the Smb2FileReader class, which allows for reading
+        ///     from a remote file on a smb share
+        /// </summary>
+        /// <param name="context">Smb2Context that the reader will operate against</param>
+        /// <param name="entry">FileEntry that is to be opened for reading</param>
         public Smb2FileReader(Smb2Context context, Smb2FileEntry entry)
         {
             this.Context = context ?? throw new ArgumentNullException(nameof(context));

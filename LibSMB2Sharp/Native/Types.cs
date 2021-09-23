@@ -1,4 +1,4 @@
-/**
+/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -22,7 +22,7 @@
 
 using System;
 
-namespace LibSMB2Sharp.Native
+namespace FoxHollow.LibSMB2Sharp.Native
 {
     public delegate void smb2_command_cb(IntPtr smb2, int status, IntPtr command_data, IntPtr cb_data);
     

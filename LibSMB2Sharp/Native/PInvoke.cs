@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -23,7 +23,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace LibSMB2Sharp.Native
+namespace FoxHollow.LibSMB2Sharp.Native
 {
     internal class Methods
     {
@@ -295,10 +295,10 @@ namespace LibSMB2Sharp.Native
         ///     This function is used to parse an SMB2 URL into a smb2_url structure.
         /// 
         ///     SMB2 URL format:
-        ///       smb2://[<domain;][<username>@]<server>/<share>/<path>
+        ///       smb2://[&lt;domain&gt;;][&lt;username&gt;@]&lt;server&gt;/&lt;share&gt;/&lt;path&gt;
         /// 
-        ///     where <server> has the format:
-        ///       <host>[:<port>].
+        ///     where &lt;server> has the format:
+        ///       &lt;host&gt;[:&lt;port&gt;].
         /// </summary>
         /// <param name="smb2"></param>
         /// <param name="url"></param>

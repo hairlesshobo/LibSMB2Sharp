@@ -1,4 +1,4 @@
-/**
+/*
  *  LibSMB2Sharp - C# Bindings for the libsmb2 C library
  * 
  *  Copyright (c) 2021 Steve Cross <flip@foxhollow.cc>
@@ -19,9 +19,9 @@
 
 using System;
 using System.Text;
-using LibSMB2Sharp.Native;
+using FoxHollow.LibSMB2Sharp.Native;
 
-namespace LibSMB2Sharp.Exceptions
+namespace FoxHollow.LibSMB2Sharp.Exceptions
 {
     public class LibSmb2NativeMethodException : Exception
     {
