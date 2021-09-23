@@ -1,0 +1,12 @@
+pipeline
+  test:
+    image: alpine
+    commands:
+      - echo hello
+      - echo world
+
+# steps:
+# - name: build
+#   image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
+#   commands:
+#   - dotnet build
