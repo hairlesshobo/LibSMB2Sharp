@@ -3,7 +3,14 @@ type: docker
 name: default
    
 steps:
-- name: build
-  image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
+- name: test
+  image: alpine
   commands:
-  - dotnet build
+  - echo hello
+  - echo world
+
+# steps:
+# - name: build
+#   image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
+#   commands:
+#   - dotnet build
