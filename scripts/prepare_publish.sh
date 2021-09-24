@@ -47,4 +47,4 @@ zip -v -r ./dist/${out_name_root}.zip ./ -x dist\* -x .git\* -x \*clib/src\* -x 
 
 echo -e "${nB}Copying NuGet packages to dist...${S}"
 rm -f ./dist/*.nupkg
-find . -name "*1.0.0-beta1.nupkg" ! -wholename "*/dist/*" -exec cp -v {} ./dist/ \; 2>&1 | sed 's/^/[find] /'
+find . -name "*${project_version}.nupkg" ! -wholename "*/dist/*" -exec cp -v {} ./dist/ \; 2>&1 | sed 's/^/[find] /'
