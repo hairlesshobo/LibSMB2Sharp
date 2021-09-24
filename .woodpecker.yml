@@ -1,12 +1,62 @@
 pipeline:
-  test:
-    image: alpine
-    commands:
-      - echo hello
-      - echo world
 
-# steps:
-# - name: build
-#   image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
-#   commands:
-#   - dotnet build
+  build:
+    image: mcr.microsoft.com/dotnet/sdk:5.0.202-alpine3.12
+    commands:
+      - dotnet restore --no-cache
+      - dotnet build
+
+  generate_docs:
+    image: alpine:3.12
+    commands:
+      - ./scripts/generate_docs.sh
+    when:
+      event: push
+      branch: [master, develop]
+
+  deploy_docs:
+    image: drillster/drone-rsync
+    source: ./docs/
+    target: ~/html/libsmb2sharp/
+    delete: true
+    args: "--verbose"
+    secrets:
+      - source: doc_deploy_key
+        target: plugin_key
+      - source: doc_deploy_server
+        target: plugin_hosts
+      - source: doc_deploy_user
+        target: plugin_user
+    when:
+      event: push
+      branch: [master, develop]
+
+  publish_source:
+    image: alpine:3.12
+    commands:
+      - echo "nothing here yet"
+    when:
+      event: tag
+      tag: release/*
+
+  publish_nuget:
+    image: alpine:3.12
+    commands:
+      - echo "nothing here yet"
+    when:
+      event: tag
+      tag: release/*
+
+# Create tags with release/v1.0.0-beta2, etc
+
+
+# On tag, check tag version against version in Directory.Build.props, if they don't match.. fail the build
+# if they match
+#   build the project
+#   create zip and tarball, push to gitea
+#   push package to nuget
+
+# On push 
+#   build the project
+#   push docs to web
+
