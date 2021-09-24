@@ -9,6 +9,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DefaultDocumentationFolder>../docs/api</DefaultDocumentationFolder>
     <DefaultDocumentationIgnoreLineBreak>true</DefaultDocumentationIgnoreLineBreak>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+      <None Include="../docs/README.md" Pack="true" PackagePath="/"/>
   </ItemGroup>
 
 </Project>
