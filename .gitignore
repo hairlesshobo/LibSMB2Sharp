@@ -454,3 +454,7 @@ clib/bin*/*
 clib/src*/*
 
 dev_connect_string.txt
+
+
+docs/build_props.xml
+docs/api
