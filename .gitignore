@@ -451,6 +451,8 @@ $RECYCLE.BIN/
 lib/*.so
 lib/*.so.*
 clib/bin*/*
+clib/bin*
+clib/src*
 clib/src*/*
 
 dev_connect_string.txt
@@ -458,3 +460,4 @@ dev_connect_string.txt
 
 docs/build_props.xml
 docs/api
+dist

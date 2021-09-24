@@ -1,11 +1,5 @@
 #!/bin/sh
-# requirements
-#   - dotnet
-#   - xmldoc2md (https://charlesdevandiere.github.io/xmldoc2md/)
-#   - dotnet tool install -g XMLDoc2Markdown
 
-
-# SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 cd $SCRIPT_DIR/../

@@ -12,7 +12,7 @@ pipeline:
       - ./scripts/generate_docs.sh
     when:
       event: push
-      branch: [master, develop]
+      branch: [master, develop, cicd_test]
 
   deploy_docs:
     image: drillster/drone-rsync
@@ -31,10 +31,10 @@ pipeline:
       event: push
       branch: [master, develop]
 
-  publish_source:
+  prepare_publish:
     image: alpine:3.12
     commands:
-      - echo "nothing here yet"
+      - ./scripts/prepare_publish.sh
     when:
       event: tag
       tag: release/*
