@@ -42,7 +42,7 @@ pipeline:
   gitea_release:
     image: plugins/gitea-release
     base_url: https://git.foxhollow.cc
-    title: ${DRONE_TAG##release/}
+    title: "LibSMB2Sharp ${DRONE_TAG##release/}"
     files:
       - dist/*
     checksum:
