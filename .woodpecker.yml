@@ -43,7 +43,9 @@ pipeline:
     image: plugins/gitea-release
     base_url: https://git.foxhollow.cc
     title: "LibSMB2Sharp ${DRONE_TAG##release/}"
-    note: RELEASE_NOTES.md
+    # Generate release notes somehow and include link to nuget
+    # https://www.nuget.org/packages/FoxHollow.LibSMB2Sharp/1.0.0-beta1
+    # note: RELEASE_NOTES.md
     # find some way to programmatically set the draft flag
     # draft: true
     files:
@@ -71,17 +73,4 @@ pipeline:
     when:
       event: tag
       tag: release/*
-
-# Create tags with release/v1.0.0-beta2, etc
-
-
-# On tag, check tag version against version in Directory.Build.props, if they don't match.. fail the build
-# if they match
-#   build the project
-#   create zip and tarball, push to gitea
-#   push package to nuget
-
-# On push 
-#   build the project
-#   push docs to web
 
