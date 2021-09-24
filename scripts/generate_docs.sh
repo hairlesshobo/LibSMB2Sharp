@@ -8,16 +8,14 @@
 # SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 
-echo $SCRIPT_DIR
-
 cd $SCRIPT_DIR/../
+
+cp ./Directory.Build.props ./docs/build_props.xml
 
 #dotnet build 
 
-cd ./docs
+# cd ./docs
 #xmldoc2md ../LibSMB2Sharp/bin/Debug/netstandard2.0/LibSMB2Sharp.dll ./api/ --examples-path examples/
-
-echo -e "\e[34mnothing to do right now\e[0m"
 
 # here we will need to generate the api/_sidebar.md file from the input index.md file
 #cd ./api

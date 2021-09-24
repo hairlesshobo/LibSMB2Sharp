@@ -17,14 +17,19 @@
       repo: 'https://git.foxhollow.cc/hairlesshobo/LibSMB2Sharp',
       coverpage: false,
       loadSidebar: true,
+      loadNavbar: true,
       maxLevel: 2,
       subMaxLevel: 3,
-      loadNavbar: true,
       relativePath: true,
       progress: {
         position: "top",
         color: "var(--theme-color,#42b983)",
         height: "3px",
+      },
+      mustache: {
+        data: [
+          'build_props.xml'
+        ]
       }
     }
   </script>
@@ -34,5 +39,7 @@
   <script src="//cdn.jsdelivr.net/npm/prismjs@1.25.0/components/prism-bash.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-darklight-theme@3.2.0/dist/index.min.js" type="text/javascript"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-progress@1.0.3/dist/progress.min.js"></script>
+  <script src="//unpkg.com/docsify-plugin-flexible-alerts@1.1.0"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify-mustache@1.0.5"></script>
 </body>
 </html>

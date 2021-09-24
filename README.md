@@ -1,17 +1,24 @@
 # LibSMB2Sharp
 
 ## About
-This library is meant to provide native bindings for the libsmb2 C library. The 
-idea being that you would then be able to access SMB shares from any C# project, 
-regardless of OS platform.
+This library is meant to provide native bindings for the 
+[libsmb2 C library](https://github.com/sahlberg/libsmb2). The idea being that you 
+would then be able to access SMB shares from any C# project, regardless of OS platform.
 
 
 ## **Sasquatch Warning**
-I can guarantee that this code is incomplete, buggy, and will most likely cause you 
-to grow obscene amounts of hair on your forhead, feet, ears and every other part of 
-your body if you so much as even consider using this library.
+> I can guarantee that this code is incomplete, buggy, and will most likely cause you 
+> to grow obscene amounts of hair on your forhead, feet, ears and every other part of 
+> your body if you so much as even consider using this library.
+>
+> ... You have been warned!
 
-... You have been warned!
+## OS Support Status
+At the moment, only linux support has been worked on. After linux support is complete,
+Windows will be the next target. While I would like to work on macOS support as well,
+I am unable to do so because I do not have access to any macOS capable hardware.
+If you would like to help add support for macOS, please let me know!
+
 
 ## TODO
 * Add ability to open a file for appending
@@ -22,7 +29,8 @@ your body if you so much as even consider using this library.
 Below I will list each API call that is available in libsmb2 and categorizes them based on
 their current implementation status in this wrapper library.
 
-#### Fully ported and functionality available:
+
+#### Fully ported and functionality available
 * smb2_close
 * smb2_closedir
 * smb2_connect_share
@@ -59,7 +67,7 @@ their current implementation status in this wrapper library.
 * smb2_write
 
 
-#### In PInvoke.cs but NOT ported yet (Future scope):
+#### In PInvoke.cs but NOT ported yet (Future scope)
 * smb2_close_async
 * smb2_cmd_close_async
 * smb2_cmd_create_async
@@ -114,7 +122,7 @@ their current implementation status in this wrapper library.
 * smb2_truncate
 
 
-#### Most likely not in scope:
+#### Most likely not in scope
 * smb2_fh_from_file_id
 * smb2_free_data
 * smb2_get_file_id
@@ -124,7 +132,26 @@ their current implementation status in this wrapper library.
 * smb2_set_opaque
 
 
-#### Not in scope:
+#### Not in scope
 * smb2_add_compound_pdu
 * smb2_free_pdu
 * smb2_queue_pdu
+
+
+## License
+LibSMB2Sharp is licensed under the GNU Lesser General Public License (LGPL) v2.1 or later
+
+Copyright © 2021 Steve Cross
+
+> This program is free software; you can redistribute it and/or modify  
+> it under the terms of the GNU Lesser General Public License as published by  
+> the Free Software Foundation; either version 2.1 of the License, or  
+> (at your option) any later version.
+>  
+> This program is distributed in the hope that it will be useful,  
+> but WITHOUT ANY WARRANTY; without even the implied warranty of  
+> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+> GNU Lesser General Public License for more details.  
+>  
+> You should have received a copy of the GNU Lesser General Public License  
+> along with this program; if not, see <http://www.gnu.org/licenses/>.
