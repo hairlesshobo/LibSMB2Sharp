@@ -29,7 +29,7 @@ if [ "$project_version" != "$tag_version" ]; then
     exit 1
 fi
 
-echo -e "${nG}Starting to build source release for ${project_name} v${tag_version}${S}"
+echo -e "${nG}Preparing publish for ${project_name} v${tag_version}${S}"
 
 cd $SCRIPT_DIR/../
 
@@ -37,14 +37,14 @@ echo -n "Creating dist directory... "
 mkdir -p dist
 echo "Done"
 
-echo "${nB}Creating '${out_name_root}.tar.gz'...${S}"
+echo -e "${nB}Creating '${out_name_root}.tar.gz'...${S}"
 rm -f ./dist/${out_name_root}.tar.gz
 tar --exclude "./dist" --exclude=".git" --exclude="./clib/src*" --exclude="**/obj" --exclude="**/bin" --exclude="dev_connect_string.txt" -czvf ./dist/${out_name_root}.tar.gz ./ 2>&1 | sed 's/^/[tar] /'
 
-echo "${nB}Creating '${out_name_root}.zip'...${S}"
+echo -e "${nB}Creating '${out_name_root}.zip'...${S}"
 rm -f ./dist/${out_name_root}.zip
 zip -v -r ./dist/${out_name_root}.zip ./ -x dist\* -x .git\* -x \*clib/src\* -x \*/obj\* -x \*/bin\* -x \*dev_connect_string.txt 2>&1 | sed 's/^/[zip] /'
 
-echo "${nB}Copying NuGet packages to dist...${S}"
+echo -e "${nB}Copying NuGet packages to dist...${S}"
 rm -f ./dist/*.nupkg
 find . -name "*1.0.0-beta1.nupkg" ! -wholename "*/dist/*" -exec cp -v {} ./dist/ \; 2>&1 | sed 's/^/[find] /'

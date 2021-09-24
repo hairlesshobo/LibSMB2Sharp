@@ -39,6 +39,26 @@ pipeline:
       event: tag
       tag: release/*
 
+  gitea_release:
+    image: plugins/gitea-release
+    settings:
+      base_url: https://git.foxhollow.cc
+      files:
+        - dist/*
+      checksum:
+        - md5
+        - sha1
+        - sha256
+        - sha512
+        - adler32
+        - crc32
+    secrets:
+      - source: release_key
+        target: plugin_api_key
+    when:
+      event: tag
+      tag: release/*
+
   publish_nuget:
     image: alpine:3.12
     commands:
