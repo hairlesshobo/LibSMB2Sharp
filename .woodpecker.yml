@@ -43,6 +43,9 @@ pipeline:
     image: plugins/gitea-release
     base_url: https://git.foxhollow.cc
     title: "LibSMB2Sharp ${DRONE_TAG##release/}"
+    note: RELEASE_NOTES.md
+    # find some way to programmatically set the draft flag
+    # draft: true
     files:
       - dist/*
     checksum:
@@ -60,9 +63,11 @@ pipeline:
       tag: release/*
 
   publish_nuget:
-    image: alpine:3.12
+    image: mcr.microsoft.com/dotnet/sdk:5.0.202-alpine3.12
     commands:
-      - echo "nothing here yet"
+      - dotnet nuget push *.nupkg --api-key $NUGET_PUBLISH_KEY
+      # - dotnet nuget push *.nupkg --api-key $NUGET_PUBLISH_KEY --source https://api.nuget.org/v3/index.json
+    environment: [nuget_publish_key]
     when:
       event: tag
       tag: release/*
